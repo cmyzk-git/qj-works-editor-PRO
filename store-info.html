@@ -1,77 +1,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Building2, MapPin, Phone, Mail, Globe, Train, Tag, 
-  ClipboardPaste, Trash2, CheckCircle, Info, Star
+  ClipboardPaste, Trash2, Download, Star, Info, CheckCircle,
+  Clock, Coffee, CreditCard, Users
 } from 'lucide-react';
 
-const STORAGE_KEY = 'shop_info_draft_v2';
+const STORAGE_KEY = 'shop_info_draft_v3_4';
+const VERSION = "v3.4 (最寄駅・こだわり条件修正)";
 
 const App = () => {
   const initialState = {
-    recruitTitle: "",
-    shopName: "",
-    shopNameKana: "",
-    zipCode: "",
-    prefecture: "",
-    city: "",
-    addressLine: "",
-    building: "",
-    floor: "",
-    commercialFacilityId: "",
-    hideMap: false,
-    station1Id: "",
-    line1Id: "",
-    bus1Time: "",
-    walk1Time: "",
-    station2Id: "",
-    line2Id: "",
-    bus2Time: "",
-    walk2Time: "",
-    freeStation: "",
-    freeStationBus: "",
-    freeStationWalk: "",
-    genre1: "",
-    genre2: "",
-    genreDetail: "",
-    michelin: false,
-    priceRange: "",
-    seats: "",
-    smoking: "",
-    regularHoliday: "",
-    sundayClosed: false,
-    openYear: "",
-    openMonth: "",
-    openDay: "",
-    isOpening: false,
-    isPrivateBusiness: false,
-    seniorActive: false,
-    highRetention: false,
-    teamWork: false,
-    comfortableKitchen: false,
-    stableCompany: false,
-    shopFeatures: "", // お店の特徴（追加項目）
-    homepage: "",
-    tel: "",
-    fax: "",
-    contactTel: "",
-    email1: "",
-    email2: "",
-    email3: "",
-    recruiterName: "",
-    recruiterNameKana: "",
+    id: "",
+    recruitTitle: "", shopName: "", shopNameKana: "", zipCode: "", prefecture: "",
+    city: "", addressLine: "", building: "", floor: "", commercialFacilityId: "",
+    hideMap: false, station1Id: "", line1Id: "", bus1Time: "", walk1Time: "",
+    station2Id: "", line2Id: "", bus2Time: "", walk2Time: "", freeStation: "",
+    freeStationBus: "", freeStationWalk: "", genre1: "", genre2: "", genreDetail: "",
+    michelin: false, priceRange: "", seats: "", smoking: "", regularHoliday: "",
+    sundayClosed: false, openYear: "", openMonth: "", openDay: "", isOpening: false,
+    isPrivateBusiness: false, seniorActive: false, highRetention: false, teamWork: false,
+    comfortableKitchen: false, stableCompany: false, shopFeatures: "", homepage: "",
+    tel: "", fax: "", contactTel: "", email1: "", email2: "", email3: "",
+    recruiterName: "", recruiterNameKana: "", kodawariCondition: "",
   };
 
   const [formData, setFormData] = useState(initialState);
   const [pasteText, setPasteText] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
+  // 保存データの復元
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      try {
-        setFormData(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to load saved data");
+      try { 
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      } catch (e) { 
+        console.error("Load Error"); 
       }
     }
   }, []);
@@ -84,10 +49,7 @@ const App = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const newData = {
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    };
+    const newData = { ...formData, [name]: type === 'checkbox' ? checked : value };
     setFormData(newData);
     autoSave(newData);
   };
@@ -101,219 +63,789 @@ const App = () => {
     }
   };
 
+  /**
+   * 堅牢なキー・バリュー形式パーサー（v3.4修正版）
+   */
   const parseAndDistribute = () => {
     if (!pasteText) return;
-
-    const lines = pasteText.split('\n').map(line => line.trim()).filter(l => l !== "");
+    
     let newData = { ...formData };
-
-    for (let i = 0; i < lines.length; i++) {
-      const current = lines[i];
-      const next = lines[i + 1] || "";
-
-      // 1. 店名とカナの抽出改善
-      if (current.includes("店名")) {
-        const val = current.includes(":") || current.includes("　") ? current.split(/[:　]/)[1] : next;
-        if (val) {
-          const kanaMatch = val.match(/(.*?)[（\(]([ァ-ヶー\s]+)[）\)]/);
-          if (kanaMatch) {
-            newData.shopName = kanaMatch[1].trim();
-            newData.shopNameKana = kanaMatch[2].trim();
-          } else {
-            newData.shopName = val.trim();
-          }
-        }
-      }
-
-      // 2. アクセス情報の高度な解析
-      if (current.includes("最寄駅") || current.includes("アクセス")) {
-        const accessText = current.includes(":") || current.includes("　") ? current : next;
-        
-        // 「路線名 駅名より徒歩〇分」などのパターンを解析
-        const walkMatch = accessText.match(/(.*?)[\s　](.*?)駅[よよ]り徒歩(\d+)分/);
-        const busMatch = accessText.match(/(.*?)[\s　](.*?)駅[よよ]りバス(\d+)分/);
-
-        if (walkMatch) {
-          newData.line1Id = walkMatch[1].trim();
-          newData.station1Id = walkMatch[2].trim();
-          newData.walk1Time = walkMatch[3].trim();
-        } else if (busMatch) {
-          newData.line1Id = busMatch[1].trim();
-          newData.station1Id = busMatch[2].trim();
-          newData.bus1Time = busMatch[3].trim();
-        } else {
-          // 自由記述として振り分け
-          newData.freeStation = accessText.replace(/最寄駅\d?\s*/, "").trim();
-        }
-      }
-
-      // 3. その他の項目
-      if (current === "募集タイトル") newData.recruitTitle = next;
-      if (current === "業種1" || current === "業態1") newData.genre1 = next;
-      if (current === "業種2" || current === "業態2") newData.genre2 = next;
-      if (current === "業態の詳細") newData.genreDetail = next;
-      if (current === "客単価") newData.priceRange = next;
-      if (current === "席数") newData.seats = next;
-      if (current === "喫煙") newData.smoking = next;
-      if (current === "定休日") newData.regularHoliday = next;
-      if (current === "お店の特徴" || current === "こだわり") newData.shopFeatures = next;
-      if (current === "ホームページ" || current === "HP") newData.homepage = next;
-      if (current === "電話番号" || current === "TEL") newData.tel = next;
-      if (current === "メールアドレス") newData.email1 = next;
-    }
-
+    const fullText = pasteText.trim();
+    
+    // キー・バリュー辞書を構築
+    const kvDict = parseKeyValueFormat(fullText);
+    
+    // 各フィールドにマッピング
+    mapKVToFormData(kvDict, newData);
+    
     setFormData(newData);
     autoSave(newData);
     setPasteText("");
-    setStatusMessage("解析が完了しました");
+    setStatusMessage("解析完了");
   };
 
-  const SectionTitle = ({ icon: Icon, title }) => (
-    <div className="flex items-center gap-2 mb-4 mt-8 pb-2 border-b-2 border-indigo-100">
-      <Icon className="w-5 h-5 text-indigo-600" />
-      <h2 className="text-lg font-bold text-gray-800">{title}</h2>
-    </div>
-  );
+  /**
+   * キー・バリュー形式のテキストをパースして辞書化（修正版）
+   * 複合キー（「電話 / FAX」「ホームページ アドレス」など）に対応
+   */
+  const parseKeyValueFormat = (text) => {
+    const kvDict = {};
+    
+    const lines = text.split('\n').map(l => l.trim());
+    let i = 0;
+    
+    while (i < lines.length) {
+      const line = lines[i];
+      if (!line) {
+        i++;
+        continue;
+      }
+      
+      // パターン1: 「キー：値」形式を検出
+      const colonMatch = line.match(/^(.+?)[:：](.+)$/);
+      if (colonMatch) {
+        const key = colonMatch[1].trim();
+        const value = colonMatch[2].trim();
+        kvDict[key] = value;
+        i++;
+        continue;
+      }
+      
+      // パターン2: 「キー\n値」形式（既知キーのみ）
+      if (isKnownKey(line)) {
+        const key = line;
+        let value = "";
+        
+        if (i + 1 < lines.length) {
+          const nextLine = lines[i + 1];
+          // 次の行がキーでなく、かつ値が存在する場合
+          if (!isKnownKey(nextLine) && nextLine) {
+            value = nextLine;
+            i += 2;
+            // 複数行の値を結合
+            while (i < lines.length && !isKnownKey(lines[i]) && lines[i]) {
+              value += "\n" + lines[i];
+              i++;
+            }
+            kvDict[key] = value;
+            continue;
+          }
+        }
+        i++;
+        continue;
+      }
+      
+      // パターン3: 「キー　値」形式（スペース区切り、複合キー対応）
+      // ※複合キー（「電話 / FAX」「ホームページ アドレス」など）を検出
+      const spaceMatch = line.match(/^(.+?)[\u3000\s]{1,}(.+)$/);
+      if (spaceMatch) {
+        const potentialKey = spaceMatch[1].trim();
+        const value = spaceMatch[2].trim();
+        
+        // 単一キーまたは複合キーとして認識
+        if (isKnownKey(potentialKey)) {
+          kvDict[potentialKey] = value;
+          i++;
+          continue;
+        }
+      }
+      
+      i++;
+    }
+    
+    return kvDict;
+  };
 
-  const InputField = ({ label, name, type = "text", placeholder, isRequired = false }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-bold text-gray-700 mb-1">
-        {label} {isRequired && <span className="text-red-500 text-xs">*必須</span>}
-      </label>
+  /**
+   * 既知のキー一覧（複合キーも含む）
+   */
+  const isKnownKey = (key) => {
+    const knownKeys = [
+      'ID', 'id', '店舗ID', '店舗 ID',
+      '店名', '店舗名', '採用担当者', '住所',
+      '電話', 'TEL', '電話 / FAX', '連絡先電話番号', '連絡先電話',
+      'FAX', 'FAX番号',
+      'メールアドレス', 'メール',
+      'メールアドレス2', 'メール2',
+      'メールアドレス3', 'メール3',
+      'ホームページ', 'ホームページ アドレス', 'URL', 'HP',
+      '最寄駅1', '最寄駅 1', '最寄り駅1', '最寄り駅 1',
+      '最寄駅2', '最寄駅 2', '最寄り駅2', '最寄り駅 2',
+      '募集タイトル', '募集 タイトル',
+      '業種1', '業種 1', '業態1', '業態 1',
+      '業種2', '業種 2', '業態2', '業態 2',
+      '業態の詳細', '業態 詳細', '業態詳細',
+      '客単価', '単価',
+      '席数',
+      '喫煙', '喫煙状況',
+      '定休日',
+      'こだわり条件', 'こだわり',
+      'お店の特徴',
+    ];
+    return knownKeys.includes(key);
+  };
+
+  /**
+   * キー・バリュー辞書からフォームデータにマッピング
+   */
+  const mapKVToFormData = (kvDict, newData) => {
+    // ID
+    if (kvDict['ID'] || kvDict['id'] || kvDict['店舗ID'] || kvDict['店舗 ID']) {
+      newData.id = (kvDict['ID'] || kvDict['id'] || kvDict['店舗ID'] || kvDict['店舗 ID']).trim();
+    }
+
+    // 店名とカナ
+    const shopNameRaw = kvDict['店名'] || kvDict['店舗名'] || '';
+    if (shopNameRaw) {
+      const kanaMatch = shopNameRaw.match(/(.*?)[（\(]([ァ-ヶー\s]+)[）\)]/);
+      if (kanaMatch) {
+        newData.shopName = kanaMatch[1].trim();
+        newData.shopNameKana = kanaMatch[2].trim();
+      } else {
+        newData.shopName = shopNameRaw;
+      }
+    }
+
+    // 採用担当者名とカナ
+    const recruiterRaw = kvDict['採用担当者'] || '';
+    if (recruiterRaw) {
+      const kanaMatch = recruiterRaw.match(/(.*?)[（\(]([ァ-ヶー\s]+)[）\)]/);
+      if (kanaMatch) {
+        newData.recruiterName = kanaMatch[1].trim();
+        newData.recruiterNameKana = kanaMatch[2].trim();
+      } else {
+        newData.recruiterName = recruiterRaw;
+      }
+    }
+
+    // 住所の解析（ビル・階数も抽出）
+    const addressRaw = kvDict['住所'] || '';
+    if (addressRaw) {
+      parseAddress(addressRaw, newData);
+    }
+
+    // 電話・FAX・連絡先
+    const telFaxRaw = kvDict['電話 / FAX'] || '';
+    const telRaw = kvDict['電話'] || kvDict['TEL'] || '';
+    const faxRaw = kvDict['FAX'] || kvDict['FAX番号'] || '';
+    const contactTelRaw = kvDict['連絡先電話番号'] || kvDict['連絡先電話'] || '';
+
+    // 「電話 / FAX」形式：スラッシュまたはスペースで分割
+    if (telFaxRaw) {
+      // パターン1: 「06-4256-7578 / 06-4256-7579」（スラッシュ区切り）
+      const slashMatch = telFaxRaw.match(/(\d{1,4}-\d{1,4}-\d{3,4})\s*\/\s*(\d{1,4}-\d{1,4}-\d{3,4})/);
+      if (slashMatch) {
+        newData.tel = slashMatch[1];
+        newData.fax = slashMatch[2];
+      } else {
+        // パターン2: スラッシュがない場合、複数の電話番号を抽出
+        const parts = extractPhoneNumbers(telFaxRaw);
+        if (parts.length >= 1) newData.tel = parts[0];
+        if (parts.length >= 2) newData.fax = parts[1];
+      }
+    }
+    
+    if (telRaw && !newData.tel) {
+      newData.tel = extractSinglePhoneNumber(telRaw);
+    }
+    if (faxRaw && !newData.fax) {
+      newData.fax = extractSinglePhoneNumber(faxRaw);
+    }
+    if (contactTelRaw && !newData.contactTel) {
+      newData.contactTel = extractSinglePhoneNumber(contactTelRaw);
+    }
+
+    // メールアドレス
+    const emailRaw = kvDict['メールアドレス'] || kvDict['メール'] || '';
+    const email2Raw = kvDict['メールアドレス2'] || kvDict['メール2'] || '';
+    const email3Raw = kvDict['メールアドレス3'] || kvDict['メール3'] || '';
+
+    if (emailRaw) newData.email1 = extractEmail(emailRaw);
+    if (email2Raw) newData.email2 = extractEmail(email2Raw);
+    if (email3Raw) newData.email3 = extractEmail(email3Raw);
+
+    // ホームページ
+    const homepageRaw = kvDict['ホームページ'] || kvDict['ホームページ アドレス'] || kvDict['URL'] || kvDict['HP'] || '';
+    if (homepageRaw) {
+      newData.homepage = extractURL(homepageRaw);
+    }
+
+    // 最寄駅1（修正版：駅名と路線を正確に抽出）
+    const station1Raw = kvDict['最寄駅1'] || kvDict['最寄駅 1'] || kvDict['最寄り駅1'] || kvDict['最寄り駅 1'] || '';
+    if (station1Raw) {
+      parseStationInfoV2(station1Raw, newData, 1);
+    }
+
+    // 最寄駅2
+    const station2Raw = kvDict['最寄駅2'] || kvDict['最寄駅 2'] || kvDict['最寄り駅2'] || kvDict['最寄り駅 2'] || '';
+    if (station2Raw) {
+      parseStationInfoV2(station2Raw, newData, 2);
+    }
+
+    // 募集タイトル
+    if (kvDict['募集タイトル'] || kvDict['募集 タイトル']) {
+      newData.recruitTitle = (kvDict['募集タイトル'] || kvDict['募集 タイトル']).trim();
+    }
+
+    // 業種1, 業種2
+    const genre1Raw = kvDict['業種1'] || kvDict['業種 1'] || kvDict['業態1'] || kvDict['業態 1'] || '';
+    const genre2Raw = kvDict['業種2'] || kvDict['業種 2'] || kvDict['業態2'] || kvDict['業態 2'] || '';
+    
+    if (genre1Raw) newData.genre1 = genre1Raw.trim();
+    if (genre2Raw) newData.genre2 = genre2Raw.trim();
+
+    // 業態の詳細
+    const genreDetailRaw = kvDict['業態の詳細'] || kvDict['業態 詳細'] || kvDict['業態詳細'] || '';
+    if (genreDetailRaw) newData.genreDetail = genreDetailRaw.trim();
+
+    // 客単価
+    const priceRaw = kvDict['客単価'] || kvDict['単価'] || '';
+    if (priceRaw) newData.priceRange = priceRaw.trim();
+
+    // 席数
+    const seatsRaw = kvDict['席数'] || '';
+    if (seatsRaw) {
+      const seatsMatch = seatsRaw.match(/(\d+)/);
+      if (seatsMatch) newData.seats = seatsMatch[1];
+    }
+
+    // 喫煙
+    const smokingRaw = kvDict['喫煙'] || kvDict['喫煙状況'] || '';
+    if (smokingRaw) newData.smoking = smokingRaw.trim();
+
+    // 定休日
+    const holidayRaw = kvDict['定休日'] || '';
+    if (holidayRaw) newData.regularHoliday = holidayRaw.trim();
+
+    // こだわり条件（自動チェック＆テキスト保存）
+    const kodawariRaw = kvDict['こだわり条件'] || kvDict['こだわり'] || '';
+    if (kodawariRaw) {
+      newData.kodawariCondition = kodawariRaw.trim();
+      // こだわり条件から自動でチェックボックスをON
+      applyKodawariConditions(kodawariRaw, newData);
+    }
+
+    // お店の特徴（項目名「お店の特徴」が頭にある場合のみ抽出）
+    const shopFeaturesRaw = kvDict['お店の特徴'] || '';
+    if (shopFeaturesRaw) {
+      newData.shopFeatures = shopFeaturesRaw.trim();
+    }
+  };
+
+  /**
+   * こだわり条件の文字列からチェックボックスを自動ON
+   */
+  const applyKodawariConditions = (kodawariText, newData) => {
+    const conditions = kodawariText.split('、').map(c => c.trim());
+    
+    const conditionMap = {
+      'シニア・ミドル活躍': 'seniorActive',
+      'ミシュラン・ビブグルマン掲載店': 'michelin',
+      '日曜定休': 'sundayClosed',
+      'オープニング': 'isOpening',
+      '個人経営': 'isPrivateBusiness',
+      '定着率90%以上': 'highRetention',
+      '定着率90％以上': 'highRetention',
+      '一体感のある職場': 'teamWork',
+      '快適な厨房': 'comfortableKitchen',
+      '安定した上場・老舗企業': 'stableCompany',
+    };
+    
+    conditions.forEach(condition => {
+      for (const [key, fieldName] of Object.entries(conditionMap)) {
+        if (condition.includes(key)) {
+          newData[fieldName] = true;
+        }
+      }
+    });
+  };
+
+  /**
+   * 最寄駅情報をパース（修正版v2）
+   * 例：「地下鉄四つ橋線 肥後橋駅よりバス2分、徒歩1分」
+   * 駅名「肥後橋駅」、路線「地下鉄四つ橋線」、バス分「2」、徒歩分「1」を抽出
+   */
+  const parseStationInfoV2 = (stationRaw, newData, stationNum) => {
+    // 路線を抽出（最初の日本語部分＋線）
+    const lineMatch = stationRaw.match(/^([^より\n]*?線)/);
+    const lineName = lineMatch ? lineMatch[1] : '';
+
+        // 駅名を抽出（「駅より」か「駅で」の前）
+    const stationMatch = stationRaw.match(/([^\s\n]*駅)より/);
+    const stationName = stationMatch ? stationMatch[1] : '';
+
+    // 徒歩分を抽出
+    const walkMatch = stationRaw.match(/徒歩(\d+)分/);
+    const walkTime = walkMatch ? walkMatch[1] : '';
+
+    // バス分を抽出
+    const busMatch = stationRaw.match(/バス(\d+)分/);
+    const busTime = busMatch ? busMatch[1] : '';
+
+    if (stationNum === 1) {
+      if (stationName) newData.station1Id = stationName;
+      if (lineName) newData.line1Id = lineName;
+      if (walkTime) newData.walk1Time = walkTime;
+      if (busTime) newData.bus1Time = busTime;
+    } else if (stationNum === 2) {
+      if (stationName) newData.station2Id = stationName;
+      if (lineName) newData.line2Id = lineName;
+      if (walkTime) newData.walk2Time = walkTime;
+      if (busTime) newData.bus2Time = busTime;
+    }
+  };
+
+  /**
+   * 住所をパース（郵便番号、都道府県、市区町村、番地、ビル・階数に分割）
+   */
+  const parseAddress = (address, newData) => {
+    // 郵便番号抽出
+    const zipMatch = address.match(/(\d{3})-(\d{4})\s+(.+)/);
+    let rest = address;
+    
+    if (zipMatch) {
+      newData.zipCode = zipMatch[1] + '-' + zipMatch[2];
+      rest = zipMatch[3];
+    }
+
+    // 都道府県抽出
+    const prefMatch = rest.match(/^(.{2,3}?[都道府県])(.*)/);
+    if (prefMatch) {
+      newData.prefecture = prefMatch[1];
+      const cityRest = prefMatch[2];
+      
+      // 市区町村抽出
+      const cityMatch = cityRest.match(/(.*?[市区町村])(.*)/);
+      if (cityMatch) {
+        newData.city = cityMatch[1];
+        const restAfterCity = cityMatch[2];
+        
+        // ビル・マンション名と階数を抽出
+        // パターン：「数字丁目X-X ビル名 XX階」など
+        const buildingMatch = restAfterCity.match(/^([^\n]*?)(\d+)[F階]?$/);
+        if (buildingMatch) {
+          const addressPart = buildingMatch[1].trim();
+          const floorPart = buildingMatch[2];
+          
+          // 番地とビル名を分割
+          const addressBuildingMatch = addressPart.match(/^(.+?)[\s　]+(.+)$/);
+          if (addressBuildingMatch) {
+            newData.addressLine = addressBuildingMatch[1].trim();
+            newData.building = addressBuildingMatch[2].trim();
+            newData.floor = floorPart;
+          } else {
+            newData.addressLine = addressPart;
+            newData.floor = floorPart;
+          }
+        } else {
+          // ビル情報がない場合
+          const parts = restAfterCity.match(/^(.+?)[\s　]+(.+)$/);
+          if (parts) {
+            newData.addressLine = parts[1].trim();
+            newData.building = parts[2].trim();
+          } else {
+            newData.addressLine = restAfterCity;
+          }
+        }
+      } else {
+        newData.addressLine = cityRest;
+      }
+    } else {
+      newData.addressLine = rest;
+    }
+  };
+
+  /**
+   * 電話番号を抽出（複数ある場合は配列）
+   */
+  const extractPhoneNumbers = (text) => {
+    const pattern = /\d{1,4}-\d{1,4}-\d{3,4}/g;
+    const matches = text.match(pattern) || [];
+    return matches;
+  };
+
+  /**
+   * 単一の電話番号を抽出
+   */
+  const extractSinglePhoneNumber = (text) => {
+    const pattern = /\d{1,4}-\d{1,4}-\d{3,4}/;
+    const match = text.match(pattern);
+    return match ? match[0] : '';
+  };
+
+  /**
+   * メールアドレスを抽出
+   */
+  const extractEmail = (text) => {
+    const pattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    const match = text.match(pattern);
+    return match ? match[0] : '';
+  };
+
+  /**
+   * URLを抽出
+   */
+  const extractURL = (text) => {
+    const pattern = /https?:\/\/[^\s]+/;
+    const match = text.match(pattern);
+    return match ? match[0] : '';
+  };
+
+  // CSVダウンロード機能
+  const downloadCSV = () => {
+    const headers = [
+      "募集タイトル（上限50文字）",
+      "店名",
+      "店名カナ",
+      "郵便番号",
+      "都道府県",
+      "市・区・郡",
+      "町・番地（上限20文字）",
+      "ビル・マンション",
+      "階数",
+      "商業施設（ID）",
+      "地図を表示しない",
+      "最寄り駅1（ID）",
+      "最寄り駅1路線（ID）",
+      "最寄り駅1バス〇分",
+      "最寄り駅1徒歩〇分",
+      "最寄り駅2（ID）",
+      "最寄り駅2路線（ID）",
+      "最寄り駅2バス〇分",
+      "最寄り駅2徒歩〇分",
+      "フリーテキストの最寄り駅",
+      "フリーテキストの最寄り駅バス〇分",
+      "フリーテキストの最寄り駅徒歩〇分",
+      "業態1",
+      "業態2",
+      "業態の詳細（上限25文字）",
+      "ミシュラン・ビブグルマン掲載店",
+      "客単価",
+      "席数",
+      "喫煙",
+      "定休日",
+      "日曜定休",
+      "オープン日\u3000年（オープニングスタッフ募集の場合は必須）",
+      "オープン日\u3000月（オープニングスタッフ募集の場合は必須）",
+      "オープン日\u3000日",
+      "オープニング\u3000※求人登録時点を基準とし、これからオープンするお店と過去3ヶ月以内にオープンしたお店の求人に限ります",
+      "個人経営※法人化の有無にかかわらず、運営店舗が２店舗以下の場合にチェックしてください",
+      "シニア・ミドル活躍※「シニア・ミドル活躍」の検索結果に表示したい場合はチェックしてください",
+      "定着率90％以上※直近1年間で入社した正社員の中で離職した割合が10%未満、または直近1年間の離職率が10%未満の場合にチェックしてください（正社員が1名以上いる店舗で選択可能）",
+      "一体感のある職場",
+      "快適な厨房",
+      "安定した上場・老舗企業",
+      "お店の特徴",
+      "ホームページアドレス",
+      "電話番号※ハイフン必須",
+      "FAX番号※ハイフン必須",
+      "連絡先電話番号※ハイフン必須",
+      "採用担当者",
+      "担当者カナ",
+      "メールアドレス1",
+      "メールアドレス2",
+      "メールアドレス3"
+    ];
+
+    const row = [
+      formData.recruitTitle,
+      formData.shopName,
+      formData.shopNameKana,
+      formData.zipCode,
+      formData.prefecture,
+      formData.city,
+      formData.addressLine,
+      formData.building,
+      formData.floor,
+      formData.commercialFacilityId,
+      formData.hideMap ? "1" : "0",
+      formData.station1Id,
+      formData.line1Id,
+      formData.bus1Time,
+      formData.walk1Time,
+      formData.station2Id,
+      formData.line2Id,
+      formData.bus2Time,
+      formData.walk2Time,
+      formData.freeStation,
+      formData.freeStationBus,
+      formData.freeStationWalk,
+      formData.genre1,
+      formData.genre2,
+      formData.genreDetail,
+      formData.michelin ? "1" : "0",
+      formData.priceRange,
+      formData.seats,
+      formData.smoking,
+      formData.regularHoliday,
+      formData.sundayClosed ? "1" : "0",
+      formData.openYear,
+      formData.openMonth,
+      formData.openDay,
+      formData.isOpening ? "1" : "0",
+      formData.isPrivateBusiness ? "1" : "0",
+      formData.seniorActive ? "1" : "0",
+      formData.highRetention ? "1" : "0",
+      formData.teamWork ? "1" : "0",
+      formData.comfortableKitchen ? "1" : "0",
+      formData.stableCompany ? "1" : "0",
+      formData.shopFeatures,
+      formData.homepage,
+      formData.tel,
+      formData.fax,
+      formData.contactTel,
+      formData.recruiterName,
+      formData.recruiterNameKana,
+      formData.email1,
+      formData.email2,
+      formData.email3
+    ].map(val => `"${(val || "").toString().replace(/"/g, '""')}"`);
+
+    const csvContent = [headers.join(","), row.join(",")].join("\n");
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `店舗情報_${formData.shopName || '登録データ'}_${new Date().getTime()}.csv`;
+    link.click();
+    setStatusMessage("CSV出力完了");
+  };
+
+  const InputField = ({ label, name, type = "text", placeholder }) => (
+    <div className="mb-3">
+      <label className="block text-[11px] font-bold text-gray-500 mb-0.5">{label}</label>
       <input
         type={type}
         name={name}
         value={formData[name] || ""}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none transition bg-white"
+        className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white transition-all"
       />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-4">
-      <div className="max-w-6xl mx-auto space-y-4">
+    <div className="min-h-screen bg-slate-50 p-4 font-sans text-slate-800">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* インポートエリア */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-indigo-200">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-black text-indigo-900 flex items-center gap-2">
-              <ClipboardPaste className="w-6 h-6" />
-              店舗情報 販管原稿 解析エンジン
-            </h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-bold text-emerald-600 animate-pulse">
-                {statusMessage}
-              </span>
-              <button 
-                onClick={handleClear}
-                className="flex items-center gap-1 text-xs font-bold bg-rose-50 text-rose-600 px-3 py-2 rounded hover:bg-rose-100 transition border border-rose-200"
-              >
-                <Trash2 className="w-3 h-3" /> 全項目をクリア
-              </button>
+        {/* 操作サイドバー */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="flex items-center gap-2 text-lg font-black text-slate-900">
+                <ClipboardPaste className="w-5 h-5 text-indigo-600" /> 原稿解析
+              </h1>
+              <span className="text-[10px] font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">{VERSION}</span>
             </div>
-          </div>
-          
-          <div className="relative">
             <textarea
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
-              className="w-full h-40 p-4 border-2 border-dashed border-indigo-200 rounded-lg focus:border-indigo-500 outline-none font-mono text-sm transition bg-indigo-50/30"
-              placeholder={`【入力例】
-店名：サンプルダイニング（サンプルダイニング）
-最寄駅1：京阪本線 守口市駅より徒歩1分
-お店の特徴：アットホームな職場で...`}
+              className="w-full h-72 p-4 border border-slate-200 rounded-xl bg-slate-50 text-xs font-mono focus:ring-2 focus:ring-indigo-400 focus:bg-white outline-none transition-all"
+              placeholder="販管の下書きやメール本文をここに貼り付け..."
             ></textarea>
             <button
               onClick={parseAndDistribute}
-              className="mt-2 w-full bg-indigo-600 text-white py-3 rounded-md font-black hover:bg-indigo-700 shadow-lg active:transform active:scale-[0.99] transition-all"
+              className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-md shadow-indigo-100 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
             >
-              情報を振り分けて自動保存を実行
+              解析して反映
             </button>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <button onClick={downloadCSV} className="bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1 hover:bg-emerald-700 transition-colors">
+                <Download className="w-4 h-4" /> CSV出力
+              </button>
+              <button onClick={handleClear} className="bg-white text-slate-400 border border-slate-200 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1 hover:bg-slate-50 transition-colors">
+                <Trash2 className="w-4 h-4" /> 全消去
+              </button>
+            </div>
+            {statusMessage && (
+              <div className="mt-4 text-center animate-pulse">
+                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                  {statusMessage}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-indigo-900 text-indigo-100 p-5 rounded-2xl shadow-lg">
+            <h2 className="text-sm font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" /> 処理済みステータス
+            </h2>
+            <div className="space-y-2 text-[11px] opacity-80">
+              <p>● キー・バリュー形式：堅牢パーサー</p>
+              <p>● 最寄駅：駅名・路線を正確抽出</p>
+              <p>● こだわり条件：自動チェック＆保存</p>
+              <p>● 住所：ビル・階数を自動抽出</p>
+              <p>● お店の特徴：項目名検出後のみ抽出</p>
+            </div>
           </div>
         </div>
 
-        {/* メインフォーム */}
-        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          
-          <SectionTitle icon={Tag} title="基本設定（エクセル準拠）" />
-          <InputField label="募集タイトル（上限50文字）" name="recruitTitle" isRequired />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField label="店名" name="shopName" isRequired />
-            <InputField label="店名カナ（全角カタカナ）" name="shopNameKana" isRequired />
-          </div>
-
-          <SectionTitle icon={MapPin} title="所在地情報" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <InputField label="郵便番号" name="zipCode" placeholder="000-0000" />
-            <InputField label="都道府県" name="prefecture" />
-            <InputField label="市・区・郡" name="city" />
-            <InputField label="町・番地" name="addressLine" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField label="ビル・マンション名" name="building" />
-            <InputField label="階数" name="floor" />
-            <InputField label="商業施設(ID)" name="commercialFacilityId" />
-          </div>
-
-          <SectionTitle icon={Train} title="アクセス情報（解析結果）" />
-          <div className="p-4 bg-slate-50 rounded border border-slate-200 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <InputField label="最寄り駅1路線(ID/名)" name="line1Id" />
-              <InputField label="最寄り駅1(ID/名)" name="station1Id" />
-              <InputField label="バス(分)" name="bus1Time" />
-              <InputField label="徒歩(分)" name="walk1Time" />
+        {/* 編集フォーム */}
+        <div className="lg:col-span-8 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 overflow-y-auto max-h-[92vh]">
+          <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">店舗登録シート</h2>
+              <p className="text-xs text-slate-400 mt-1">テンプレートのカラム構造に完全準拠しています</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <InputField label="最寄り駅2路線(ID/名)" name="line2Id" />
-              <InputField label="最寄り駅2(ID/名)" name="station2Id" />
-              <InputField label="バス(分)" name="bus2Time" />
-              <InputField label="徒歩(分)" name="walk2Time" />
-            </div>
+            <Building2 className="w-10 h-10 text-slate-200" />
           </div>
 
-          <SectionTitle icon={Building2} title="業態・店舗仕様" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField label="業態1" name="genre1" />
-            <InputField label="業態2" name="genre2" />
-            <InputField label="業態の詳細" name="genreDetail" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <InputField label="客単価" name="priceRange" />
-            <InputField label="席数" name="seats" />
-            <InputField label="喫煙" name="smoking" />
-            <InputField label="定休日" name="regularHoliday" />
-          </div>
+          <div className="space-y-10">
+            {/* セクション：ID */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Shop ID</h3>
+              </div>
+              <InputField label="店舗ID" name="id" placeholder="例：25949" />
+            </section>
 
-          <SectionTitle icon={Star} title="PR・店舗詳細" />
-          <div className="mb-6">
-            <label className="block text-sm font-bold text-gray-700 mb-1">お店の特徴</label>
-            <textarea
-              name="shopFeatures"
-              value={formData.shopFeatures}
-              onChange={handleChange}
-              className="w-full h-32 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none transition"
-              placeholder="店舗の強みや特徴を記入してください"
-            ></textarea>
-          </div>
+            {/* セクション：基本 */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Basic Information</h3>
+              </div>
+              <InputField label="募集タイトル（上限50文字）" name="recruitTitle" placeholder="例：【オープニング】駅チカのイタリアンバルでの接客スタッフ" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField label="店名" name="shopName" />
+                <InputField label="店名カナ" name="shopNameKana" />
+              </div>
+            </section>
 
-          <SectionTitle icon={Globe} title="連絡先" />
-          <InputField label="ホームページアドレス" name="homepage" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField label="電話番号" name="tel" />
-            <InputField label="FAX" name="fax" />
-            <InputField label="連絡先電話番号" name="contactTel" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField label="メールアドレス1" name="email1" />
-            <InputField label="メールアドレス2" name="email2" />
-            <InputField label="メールアドレス3" name="email3" />
-          </div>
+            {/* セクション：場所 */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Location & Access</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <InputField label="郵便番号" name="zipCode" placeholder="000-0000" />
+                <InputField label="都道府県" name="prefecture" />
+                <InputField label="市・区・郡" name="city" />
+                <InputField label="町・番地" name="addressLine" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
+                <InputField label="ビル・マンション" name="building" />
+                <InputField label="階数" name="floor" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 bg-slate-50 p-4 rounded-xl">
+                <InputField label="最寄り駅1" name="station1Id" />
+                <InputField label="路線1" name="line1Id" />
+                <InputField label="バス(分)" name="bus1Time" />
+                <InputField label="徒歩(分)" name="walk1Time" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 bg-slate-50 p-4 rounded-xl">
+                <InputField label="最寄り駅2" name="station2Id" />
+                <InputField label="路線2" name="line2Id" />
+                <InputField label="バス(分)" name="bus2Time" />
+                <InputField label="徒歩(分)" name="walk2Time" />
+              </div>
+            </section>
 
-          <div className="mt-10 flex items-center gap-2 p-4 bg-amber-50 rounded text-amber-800 border border-amber-200 text-xs">
-            <Info className="w-4 h-4" />
-            <span>ブラウザのキャッシュ(localStorage)にリアルタイムでバックアップされています。クリアボタンを押さない限り、データは保持されます。</span>
+            {/* セクション：詳細スペック */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Shop Details</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InputField label="業種1" name="genre1" placeholder="例：和食" />
+                <InputField label="業種2" name="genre2" placeholder="例：居酒屋・ダイニングバー" />
+                <InputField label="業態の詳細" name="genreDetail" placeholder="例：本格薪窯ピッツェリア" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <InputField label="客単価" name="priceRange" />
+                <InputField label="席数" name="seats" />
+                <InputField label="喫煙" name="smoking" placeholder="例：屋内禁煙" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { id: 'michelin', label: 'ミシュラン掲載', icon: <Star className="w-3 h-3"/> },
+                  { id: 'isOpening', label: 'オープニング', icon: <Clock className="w-3 h-3"/> },
+                  { id: 'isPrivateBusiness', label: '個人経営', icon: <Users className="w-3 h-3"/> },
+                  { id: 'seniorActive', label: 'シニア活躍', icon: <Coffee className="w-3 h-3"/> },
+                  { id: 'highRetention', label: '定着率90%以上', icon: <CheckCircle className="w-3 h-3"/> },
+                  { id: 'teamWork', label: '一体感職場', icon: <Users className="w-3 h-3"/> },
+                  { id: 'comfortableKitchen', label: '快適厨房', icon: <Coffee className="w-3 h-3"/> },
+                  { id: 'stableCompany', label: '安定企業', icon: <Building2 className="w-3 h-3"/> },
+                ].map(item => (
+                  <label key={item.id} className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all ${formData[item.id] ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
+                    <input type="checkbox" name={item.id} checked={formData[item.id]} onChange={handleChange} className="hidden" />
+                    {item.icon}
+                    <span className="text-[11px] font-bold">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            {/* セクション：営業情報 */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Business Hours</h3>
+              </div>
+              <InputField label="定休日" name="regularHoliday" placeholder="例：月曜日" />
+            </section>
+
+            {/* セクション：コンタクト */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Contact & Recruiting</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InputField label="電話番号" name="tel" />
+                <InputField label="FAX番号" name="fax" />
+                <InputField label="連絡先電話" name="contactTel" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                <InputField label="メールアドレス1" name="email1" />
+                <InputField label="メールアドレス2" name="email2" />
+                <InputField label="メールアドレス3" name="email3" />
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <InputField label="採用担当者名" name="recruiterName" />
+                <InputField label="担当者カナ" name="recruiterNameKana" />
+              </div>
+            </section>
+
+            {/* セクション：こだわり条件 */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Preferences</h3>
+              </div>
+              <label className="block text-[11px] font-bold text-gray-500 mb-0.5">こだわり条件</label>
+              <textarea
+                name="kodawariCondition"
+                value={formData.kodawariCondition || ""}
+                onChange={handleChange}
+                placeholder="例：シニア・ミドル活躍、ミシュラン・ビブグルマン掲載店、日曜定休、オープニング、個人経営、定着率90%以上、一体感のある職場、快適な厨房、安定した上場・老舗企業"
+                className="w-full h-20 p-4 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white transition-all resize-none"
+              />
+            </section>
+
+            {/* セクション：お店の特徴 */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Store Description</h3>
+              </div>
+              <label className="block text-[11px] font-bold text-gray-500 mb-0.5">お店の特徴</label>
+              <textarea
+                name="shopFeatures"
+                value={formData.shopFeatures || ""}
+                onChange={handleChange}
+                placeholder="お店の特徴や長文説明をここに入力してください（テキスト解析時は「お店の特徴」項目名検出後のみ抽出）"
+                className="w-full h-32 p-4 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white transition-all resize-none"
+              />
+            </section>
+
+            {/* ホームページ */}
+            <section>
+              <InputField label="ホームページアドレス" name="homepage" placeholder="https://..." />
+            </section>
           </div>
         </div>
       </div>
