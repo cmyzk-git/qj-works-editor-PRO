@@ -1,0 +1,324 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Building2, MapPin, Phone, Mail, Globe, Train, Tag, 
+  ClipboardPaste, Trash2, CheckCircle, Info, Star
+} from 'lucide-react';
+
+const STORAGE_KEY = 'shop_info_draft_v2';
+
+const App = () => {
+  const initialState = {
+    recruitTitle: "",
+    shopName: "",
+    shopNameKana: "",
+    zipCode: "",
+    prefecture: "",
+    city: "",
+    addressLine: "",
+    building: "",
+    floor: "",
+    commercialFacilityId: "",
+    hideMap: false,
+    station1Id: "",
+    line1Id: "",
+    bus1Time: "",
+    walk1Time: "",
+    station2Id: "",
+    line2Id: "",
+    bus2Time: "",
+    walk2Time: "",
+    freeStation: "",
+    freeStationBus: "",
+    freeStationWalk: "",
+    genre1: "",
+    genre2: "",
+    genreDetail: "",
+    michelin: false,
+    priceRange: "",
+    seats: "",
+    smoking: "",
+    regularHoliday: "",
+    sundayClosed: false,
+    openYear: "",
+    openMonth: "",
+    openDay: "",
+    isOpening: false,
+    isPrivateBusiness: false,
+    seniorActive: false,
+    highRetention: false,
+    teamWork: false,
+    comfortableKitchen: false,
+    stableCompany: false,
+    shopFeatures: "", // お店の特徴（追加項目）
+    homepage: "",
+    tel: "",
+    fax: "",
+    contactTel: "",
+    email1: "",
+    email2: "",
+    email3: "",
+    recruiterName: "",
+    recruiterNameKana: "",
+  };
+
+  const [formData, setFormData] = useState(initialState);
+  const [pasteText, setPasteText] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        setFormData(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to load saved data");
+      }
+    }
+  }, []);
+
+  const autoSave = useCallback((data) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setStatusMessage("自動保存完了");
+    setTimeout(() => setStatusMessage(""), 2000);
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newData = {
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    };
+    setFormData(newData);
+    autoSave(newData);
+  };
+
+  const handleClear = () => {
+    if (window.confirm("全ての入力内容をクリアしてもよろしいですか？")) {
+      setFormData(initialState);
+      setPasteText("");
+      localStorage.removeItem(STORAGE_KEY);
+      setStatusMessage("全消去しました");
+    }
+  };
+
+  const parseAndDistribute = () => {
+    if (!pasteText) return;
+
+    const lines = pasteText.split('\n').map(line => line.trim()).filter(l => l !== "");
+    let newData = { ...formData };
+
+    for (let i = 0; i < lines.length; i++) {
+      const current = lines[i];
+      const next = lines[i + 1] || "";
+
+      // 1. 店名とカナの抽出改善
+      if (current.includes("店名")) {
+        const val = current.includes(":") || current.includes("　") ? current.split(/[:　]/)[1] : next;
+        if (val) {
+          const kanaMatch = val.match(/(.*?)[（\(]([ァ-ヶー\s]+)[）\)]/);
+          if (kanaMatch) {
+            newData.shopName = kanaMatch[1].trim();
+            newData.shopNameKana = kanaMatch[2].trim();
+          } else {
+            newData.shopName = val.trim();
+          }
+        }
+      }
+
+      // 2. アクセス情報の高度な解析
+      if (current.includes("最寄駅") || current.includes("アクセス")) {
+        const accessText = current.includes(":") || current.includes("　") ? current : next;
+        
+        // 「路線名 駅名より徒歩〇分」などのパターンを解析
+        const walkMatch = accessText.match(/(.*?)[\s　](.*?)駅[よよ]り徒歩(\d+)分/);
+        const busMatch = accessText.match(/(.*?)[\s　](.*?)駅[よよ]りバス(\d+)分/);
+
+        if (walkMatch) {
+          newData.line1Id = walkMatch[1].trim();
+          newData.station1Id = walkMatch[2].trim();
+          newData.walk1Time = walkMatch[3].trim();
+        } else if (busMatch) {
+          newData.line1Id = busMatch[1].trim();
+          newData.station1Id = busMatch[2].trim();
+          newData.bus1Time = busMatch[3].trim();
+        } else {
+          // 自由記述として振り分け
+          newData.freeStation = accessText.replace(/最寄駅\d?\s*/, "").trim();
+        }
+      }
+
+      // 3. その他の項目
+      if (current === "募集タイトル") newData.recruitTitle = next;
+      if (current === "業種1" || current === "業態1") newData.genre1 = next;
+      if (current === "業種2" || current === "業態2") newData.genre2 = next;
+      if (current === "業態の詳細") newData.genreDetail = next;
+      if (current === "客単価") newData.priceRange = next;
+      if (current === "席数") newData.seats = next;
+      if (current === "喫煙") newData.smoking = next;
+      if (current === "定休日") newData.regularHoliday = next;
+      if (current === "お店の特徴" || current === "こだわり") newData.shopFeatures = next;
+      if (current === "ホームページ" || current === "HP") newData.homepage = next;
+      if (current === "電話番号" || current === "TEL") newData.tel = next;
+      if (current === "メールアドレス") newData.email1 = next;
+    }
+
+    setFormData(newData);
+    autoSave(newData);
+    setPasteText("");
+    setStatusMessage("解析が完了しました");
+  };
+
+  const SectionTitle = ({ icon: Icon, title }) => (
+    <div className="flex items-center gap-2 mb-4 mt-8 pb-2 border-b-2 border-indigo-100">
+      <Icon className="w-5 h-5 text-indigo-600" />
+      <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+    </div>
+  );
+
+  const InputField = ({ label, name, type = "text", placeholder, isRequired = false }) => (
+    <div className="mb-4">
+      <label className="block text-sm font-bold text-gray-700 mb-1">
+        {label} {isRequired && <span className="text-red-500 text-xs">*必須</span>}
+      </label>
+      <input
+        type={type}
+        name={name}
+        value={formData[name] || ""}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none transition bg-white"
+      />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-6 px-4">
+      <div className="max-w-6xl mx-auto space-y-4">
+        
+        {/* インポートエリア */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-indigo-200">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-black text-indigo-900 flex items-center gap-2">
+              <ClipboardPaste className="w-6 h-6" />
+              店舗情報 販管原稿 解析エンジン
+            </h1>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-bold text-emerald-600 animate-pulse">
+                {statusMessage}
+              </span>
+              <button 
+                onClick={handleClear}
+                className="flex items-center gap-1 text-xs font-bold bg-rose-50 text-rose-600 px-3 py-2 rounded hover:bg-rose-100 transition border border-rose-200"
+              >
+                <Trash2 className="w-3 h-3" /> 全項目をクリア
+              </button>
+            </div>
+          </div>
+          
+          <div className="relative">
+            <textarea
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              className="w-full h-40 p-4 border-2 border-dashed border-indigo-200 rounded-lg focus:border-indigo-500 outline-none font-mono text-sm transition bg-indigo-50/30"
+              placeholder={`【入力例】
+店名：サンプルダイニング（サンプルダイニング）
+最寄駅1：京阪本線 守口市駅より徒歩1分
+お店の特徴：アットホームな職場で...`}
+            ></textarea>
+            <button
+              onClick={parseAndDistribute}
+              className="mt-2 w-full bg-indigo-600 text-white py-3 rounded-md font-black hover:bg-indigo-700 shadow-lg active:transform active:scale-[0.99] transition-all"
+            >
+              情報を振り分けて自動保存を実行
+            </button>
+          </div>
+        </div>
+
+        {/* メインフォーム */}
+        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          
+          <SectionTitle icon={Tag} title="基本設定（エクセル準拠）" />
+          <InputField label="募集タイトル（上限50文字）" name="recruitTitle" isRequired />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InputField label="店名" name="shopName" isRequired />
+            <InputField label="店名カナ（全角カタカナ）" name="shopNameKana" isRequired />
+          </div>
+
+          <SectionTitle icon={MapPin} title="所在地情報" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <InputField label="郵便番号" name="zipCode" placeholder="000-0000" />
+            <InputField label="都道府県" name="prefecture" />
+            <InputField label="市・区・郡" name="city" />
+            <InputField label="町・番地" name="addressLine" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <InputField label="ビル・マンション名" name="building" />
+            <InputField label="階数" name="floor" />
+            <InputField label="商業施設(ID)" name="commercialFacilityId" />
+          </div>
+
+          <SectionTitle icon={Train} title="アクセス情報（解析結果）" />
+          <div className="p-4 bg-slate-50 rounded border border-slate-200 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <InputField label="最寄り駅1路線(ID/名)" name="line1Id" />
+              <InputField label="最寄り駅1(ID/名)" name="station1Id" />
+              <InputField label="バス(分)" name="bus1Time" />
+              <InputField label="徒歩(分)" name="walk1Time" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <InputField label="最寄り駅2路線(ID/名)" name="line2Id" />
+              <InputField label="最寄り駅2(ID/名)" name="station2Id" />
+              <InputField label="バス(分)" name="bus2Time" />
+              <InputField label="徒歩(分)" name="walk2Time" />
+            </div>
+          </div>
+
+          <SectionTitle icon={Building2} title="業態・店舗仕様" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <InputField label="業態1" name="genre1" />
+            <InputField label="業態2" name="genre2" />
+            <InputField label="業態の詳細" name="genreDetail" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <InputField label="客単価" name="priceRange" />
+            <InputField label="席数" name="seats" />
+            <InputField label="喫煙" name="smoking" />
+            <InputField label="定休日" name="regularHoliday" />
+          </div>
+
+          <SectionTitle icon={Star} title="PR・店舗詳細" />
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-gray-700 mb-1">お店の特徴</label>
+            <textarea
+              name="shopFeatures"
+              value={formData.shopFeatures}
+              onChange={handleChange}
+              className="w-full h-32 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none transition"
+              placeholder="店舗の強みや特徴を記入してください"
+            ></textarea>
+          </div>
+
+          <SectionTitle icon={Globe} title="連絡先" />
+          <InputField label="ホームページアドレス" name="homepage" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <InputField label="電話番号" name="tel" />
+            <InputField label="FAX" name="fax" />
+            <InputField label="連絡先電話番号" name="contactTel" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <InputField label="メールアドレス1" name="email1" />
+            <InputField label="メールアドレス2" name="email2" />
+            <InputField label="メールアドレス3" name="email3" />
+          </div>
+
+          <div className="mt-10 flex items-center gap-2 p-4 bg-amber-50 rounded text-amber-800 border border-amber-200 text-xs">
+            <Info className="w-4 h-4" />
+            <span>ブラウザのキャッシュ(localStorage)にリアルタイムでバックアップされています。クリアボタンを押さない限り、データは保持されます。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
