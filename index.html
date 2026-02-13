@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>求人情報一括登録サポートツール v2.1.0</title>
+    <title>求人情報一括登録サポートツール v2.2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;700&display=swap');
@@ -21,28 +21,28 @@
             <div>
                 <h1 class="text-xl font-bold flex items-center gap-2">
                     求人原稿作成フォーム 
-                    <span class="text-xs bg-blue-500 px-2 py-0.5 rounded-full font-normal">v2.1.0</span>
+                    <span class="text-xs bg-blue-500 px-2 py-0.5 rounded-full font-normal">v2.2.0</span>
                 </h1>
-                <p class="text-slate-400 text-xs mt-1">自動保存・必須項目強調版</p>
+                <p class="text-slate-400 text-xs mt-1">固定残業代補助入力・自動保存版</p>
             </div>
             <div class="flex flex-col gap-3 w-full md:w-auto">
-    <div class="flex gap-2 w-full md:w-auto">
-        <button onclick="addNewJob()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg transition font-bold flex items-center justify-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            新規案件を追加
-        </button>
-        <button onclick="downloadCSV()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded-lg transition font-bold">一括CSV保存</button>
-    </div>
-    
-    <!-- CSV アップロード部分 -->
-    <div class="flex gap-2 w-full md:w-auto">
-        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
-        <button onclick="document.getElementById('csvFileInput').click()" class="flex-1 md:flex-none bg-purple-600 hover:bg-purple-500 text-sm px-4 py-2 rounded-lg transition font-bold flex items-center justify-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
-            CSV読み込み
-        </button>
-    </div>
-</div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="addNewJob()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg transition font-bold flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        新規案件を追加
+                    </button>
+                    <button onclick="downloadCSV()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-sm px-4 py-2 rounded-lg transition font-bold">一括CSV保存</button>
+                </div>
+                
+                <!-- CSV アップロード部分 -->
+                <div class="flex gap-2 w-full md:w-auto">
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
+                    <button onclick="document.getElementById('csvFileInput').click()" class="flex-1 md:flex-none bg-purple-600 hover:bg-purple-500 text-sm px-4 py-2 rounded-lg transition font-bold flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
+                        CSV読み込み
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Job List Container -->
@@ -63,10 +63,10 @@
             <div class="bg-slate-50 px-4 py-3 border-b flex justify-between items-center">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-wider card-number">案件 #1</span>
                 <div class="flex gap-3">
-                    <button class="copy-btn" class="text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1">
+                    <button class="copy-btn text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1">
                         コピーして作成
                     </button>
-                    <button class="delete-btn" class="text-rose-600 hover:text-rose-800 text-xs font-bold">
+                    <button class="delete-btn text-rose-600 hover:text-rose-800 text-xs font-bold">
                         削除
                     </button>
                 </div>
@@ -120,30 +120,150 @@
                 </section>
 
                 <!-- 2. 給与・特徴 -->
-                <section>
-                    <h3 class="text-sm font-bold text-slate-800 mb-4 border-l-4 border-emerald-500 pl-2">2. 給与・特徴</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1 required-badge">給与種別</label>
-                            <select name="salary_type" onchange="saveData()" class="w-full border p-2 rounded-lg text-sm">
-                                <option value="月給">月給</option>
-                                <option value="時給">時給</option>
-                                <option value="年俸">年俸</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1 required-badge">給与下限</label>
-                            <input type="number" name="salary_min" oninput="saveData()" class="w-full border p-2 rounded-lg text-sm" placeholder="250000">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">給与上限</label>
-                            <input type="number" name="salary_max" oninput="saveData()" class="w-full border p-2 rounded-lg text-sm" placeholder="450000">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">給与備考</label>
-                            <input type="text" name="salary_note" oninput="saveData()" class="w-full border p-2 rounded-lg text-sm" placeholder="経験・能力を考慮">
-                        </div>
+<section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+    <h3 class="flex items-center text-base font-bold text-slate-800 mb-6">
+        <span class="w-1.5 h-6 bg-emerald-500 rounded-full mr-3"></span>
+        2. 給与・特徴
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+
+        <!-- 左：基本給与 -->
+        <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600 required-badge">給与種別</label>
+                <select name="salary_type" onchange="saveData()" class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 input-focus cursor-pointer">
+                    <option value="月給">月給</option>
+                    <option value="時給">時給</option>
+                    <option value="年俸">年俸</option>
+                </select>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600 required-badge">給与下限</label>
+                <div class="relative">
+                    <input type="number" name="salary_min" oninput="saveData()" class="w-full border border-slate-200 p-2.5 pr-8 rounded-xl text-sm input-focus" placeholder="250000">
+                    <span class="absolute right-3 top-2.5 text-slate-400 text-xs">円</span>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600">給与上限</label>
+                <div class="relative">
+                    <input type="number" name="salary_max" oninput="saveData()" class="w-full border border-slate-200 p-2.5 pr-8 rounded-xl text-sm input-focus" placeholder="450000">
+                    <span class="absolute right-3 top-2.5 text-slate-400 text-xs">円</span>
+                </div>
+            </div>
+
+            <!-- 給与備考 -->
+<div class="sm:col-span-3 space-y-3 mt-2">
+
+    <label class="block text-xs font-bold text-slate-500 uppercase">
+        給与備考 (CSV項目)
+    </label>
+
+    <!-- 自動生成エリア -->
+    <div>
+        <label class="text-[10px] font-bold text-indigo-500 uppercase">
+            自動生成
+        </label>
+        <textarea name="salary_note_auto"
+            readonly
+            class="w-full bg-slate-50 border border-indigo-100 p-3 rounded-xl text-sm min-h-[80px] leading-relaxed"></textarea>
+    </div>
+
+    <!-- 手書きエリア -->
+    <div>
+        <label class="text-[10px] font-bold text-slate-400 uppercase">
+            自由記入
+        </label>
+        <textarea name="salary_note_manual"
+            oninput="saveData()"
+            class="w-full bg-white border border-slate-200 p-3 rounded-xl text-sm min-h-[100px] input-focus leading-relaxed"
+            placeholder="例：経験・能力を最大限考慮します"></textarea>
+    </div>
+
+    <!-- CSV保存用 -->
+    <input type="hidden" name="salary_note">
+
+</div>
+
+        </div>
+
+        <!-- 右：固定残業代補助 -->
+        <div class="md:col-span-4">
+            <div class="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100 space-y-4 shadow-sm h-full">
+
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">
+                        固定残業代 補助
+                    </label>
+
+                    <div class="flex bg-white p-1 rounded-lg border border-indigo-100 shadow-inner">
+                        <label class="flex items-center px-2 py-1 rounded text-[10px] cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white">
+                            <input type="radio" name="helper_enabled_radio" value="yes" class="hidden" onchange="handleHelperChange(this)"> あり
+                        </label>
+
+                        <label class="flex items-center px-2 py-1 rounded text-[10px] cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white">
+                            <input type="radio" name="helper_enabled_radio" value="none" class="hidden" onchange="handleHelperChange(this)"> なし
+                        </label>
+
+                        <label class="flex items-center px-2 py-1 rounded text-[10px] cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white">
+                            <input type="radio" name="helper_enabled_radio" value="no" checked class="hidden" onchange="handleHelperChange(this)"> 未設定
+                        </label>
+
+                        <input type="hidden" name="helper_enabled" value="no">
                     </div>
+                </div>
+
+                <!-- 補助入力 -->
+                <div class="helper-fields hidden space-y-3 pt-2 border-t border-indigo-100">
+
+    <div>
+        <label class="block text-xs font-medium text-indigo-600 mb-1">
+            金額 (円)
+        </label>
+        <input type="number"
+       name="fixed_amount"
+       oninput="updateSalaryNote(this)"
+       placeholder="45000"
+               class="w-full px-2.5 py-2 text-xs border border-indigo-100 rounded-lg">
+    </div>
+
+    <div>
+        <label class="block text-xs font-medium text-indigo-600 mb-1">
+            時間 (h)
+        </label>
+        <input type="number"
+       name="fixed_hours"
+       oninput="updateSalaryNote(this)"
+       placeholder="30"
+               class="w-full px-2.5 py-2 text-xs border border-indigo-100 rounded-lg">
+    </div>
+
+    <div>
+        <label class="block text-xs font-medium text-indigo-600 mb-1">
+            超過分の支給条件
+        </label>
+        <input type="text"
+       name="fixed_condition"
+       oninput="updateSalaryNote(this)"
+       value="超過分は別途全額支給します"
+               class="w-full px-2.5 py-2 text-xs border border-indigo-100 rounded-lg">
+    </div>
+
+</div>
+
+
+                <p class="text-[9px] text-slate-400 leading-tight">
+                    ※「あり/なし」を選択すると左の備考欄が自動更新されます。
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
                     
                     <div class="space-y-3">
                         <p class="text-[10px] font-bold text-slate-400 uppercase">特徴・給与詳細</p>
@@ -283,44 +403,108 @@
         const jobList = document.getElementById('jobList');
         const emptyState = document.getElementById('emptyState');
         const template = document.getElementById('jobCardTemplate');
-        const STORAGE_KEY = 'job_form_data_v2_1_0_stable';
+        const STORAGE_KEY = 'job_form_data_v2_2_0_stable';
 
         const CSV_HEADERS = [
             "下書き原稿のID", "職種", "雇用形態", "履歴書不要", "新卒歓迎", "未経験者歓迎", "独立希望者歓迎", "経験者優遇", "給与", "下限", "上限", "給与備考", "ボーナス・賞与あり", "昇給あり", "寮・住宅手当あり", "交通費全額支給", "家族手当", "資格手当・スキル手当", "インセンティブ制度", "退職金", "日払いOK", "扶養内OK", "応募資格", "勤務時間", "ランチのお仕事", "終電考慮", "副業・ダブルワークOK", "フルタイム歓迎", "残業月20時間以内", "休日・休暇", "月8日以上休み", "月9日以上休み", "完全週休2日制", "産休・育休", "夏季休暇", "年末年始休暇", "GW休暇", "特別休暇", "待遇", "まかない・食事補助あり", "社会保険完備", "制服貸与", "研修が充実", "海外研修", "生産者訪問", "資格取得支援", "バイク・車通勤OK", "社員登用制度", "髪型自由", "仕事内容・求める人材", "ラテアート", "包丁さばき", "飾り包丁", "ピザメイク", "製麺", "寿司技術", "盛り付け技術", "製パン技術", "製菓技術", "カクテル技法", "高級食材の知識", "英会話", "ワインの知識", "日本酒の知識", "お酒の知識", "コーヒーの知識", "お茶の知識", "肉の知識", "魚の知識", "野菜の知識", "チーズの知識", "洋菓子の知識", "和菓子の知識", "食器の知識", "婚礼料理・パーティーメニュー", "テーブルマナー", "着物の着付け", "出店開業ノウハウ", "店舗運営", "メニュー開発", "仕入れ・食材調達"
         ];
 
-       // 初期化とデータ復元
-window.onload = () => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-        try {
-            const jobs = JSON.parse(savedData);
-            if (jobs.length > 0) {
-                jobs.forEach(data => addNewJob(data, false));
+        // 初期化とデータ復元
+        window.onload = () => {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const jobs = JSON.parse(savedData);
+                    if (jobs.length > 0) {
+                        jobs.forEach(data => addNewJob(data, false));
+                    } else {
+                        addNewJob();
+                    }
+                } catch (e) {
+                    addNewJob();
+                }
             } else {
                 addNewJob();
             }
-        } catch (e) {
-            addNewJob();
-        }
+            
+            jobList.addEventListener('click', function(e) {
+                const button = e.target.closest('button');
+                if (!button) return;
+                
+                if (button.classList.contains('delete-btn')) {
+                    e.preventDefault();
+                    removeJob(button);
+                } else if (button.classList.contains('copy-btn')) {
+                    e.preventDefault();
+                    copyJob(button);
+                }
+            });
+        };
+
+        // 固定残業代補助の変更検知
+        function handleHelperChange(radio) {
+
+    const card = radio.closest('.job-card');
+    if (!card) return;
+
+    const helperBox = card.querySelector('.helper-fields'); // ← ここ修正
+    if (!helperBox) return;
+
+    if (radio.value === "yes" && radio.checked) {
+        helperBox.classList.remove('hidden');
+        card.querySelector('[name="helper_enabled"]').value = "yes";
+    } else if (radio.value === "none" && radio.checked) {
+        helperBox.classList.add('hidden');
+        card.querySelector('[name="helper_enabled"]').value = "none";
     } else {
-        addNewJob();
+        helperBox.classList.add('hidden');
+        card.querySelector('[name="helper_enabled"]').value = "no";
     }
-    
-    // イベント委譲で削除ボタンとコピーボタンを処理（追加部分）
-   jobList.addEventListener('click', function(e) {
-    const button = e.target.closest('button');
-    if (!button) return;
-    
-    if (button.classList.contains('delete-btn')) {
-        e.preventDefault();
-        removeJob(button);
-    } else if (button.classList.contains('copy-btn')) {
-        e.preventDefault();
-        copyJob(button);
+
+    saveData();
+}
+
+
+
+        // 備考の自動更新
+       function updateSalaryNote(inputEl) {
+
+    const card = inputEl.closest('.job-card');
+    if (!card) return;
+
+    const amount = card.querySelector('[name="fixed_amount"]')?.value || "";
+    const hours  = card.querySelector('[name="fixed_hours"]')?.value || "";
+    const extra  = card.querySelector('[name="fixed_condition"]')?.value || "";
+
+    const autoArea = card.querySelector('[name="salary_note_auto"]');
+    const manualArea = card.querySelector('[name="salary_note_manual"]');
+    const hidden = card.querySelector('[name="salary_note"]');
+
+    let autoText = "";
+
+    if (amount && hours) {
+        autoText += "【固定残業代情報】\n";
+        autoText += `固定残業代${amount}円（${hours}時間分）を含む\n`;
+        if (extra) autoText += extra;
     }
-});
-};
+
+    if (autoArea) autoArea.value = autoText;
+
+    let merged = autoText;
+
+    if (manualArea?.value) {
+        if (merged) merged += "\n\n";
+        merged += manualArea.value;
+    }
+
+    if (hidden) hidden.value = merged;
+
+    saveData();
+}
+
+
+
+
 
         // 保存処理
         let saveTimeout;
@@ -332,7 +516,11 @@ window.onload = () => {
                     const data = {};
                     card.querySelectorAll('input, select, textarea').forEach(el => {
                         if (el.type === 'checkbox') data[el.name] = el.checked;
-                        else data[el.name] = el.value;
+                        else if (el.type === 'radio') {
+                            if (el.checked) data[el.name] = el.value;
+                        } else {
+                            data[el.name] = el.value;
+                        }
                     });
                     jobs.push(data);
                 });
@@ -340,64 +528,114 @@ window.onload = () => {
             }, 500);
         }
 
+
         function handleInputChange() {
             validateDuplicates();
             saveData();
         }
 
-      function addNewJob(data = null, shouldSave = true) {
-    const clone = template.content.cloneNode(true);
-    const card = clone.querySelector('.job-card');
-    
+        function addNewJob(data = null, shouldSave = true) {
+
+    const fragment = template.content.cloneNode(true);
+    const card = fragment.firstElementChild;
+
+    if (!card) return;
+
+    // データ復元
     if (data) {
         Object.keys(data).forEach(key => {
-            const el = card.querySelector(`[name="${key}"]`);
-            if (el) {
+            const els = card.querySelectorAll(`[name="${key}"]`);
+            els.forEach(el => {
                 if (el.type === 'checkbox') {
-                    // チェックボックスはブール値または"1"/"true"などの文字列に対応
-                    const value = data[key];
-                    el.checked = (value === true || value === 'true' || value === '1' || value === 1);
+                    el.checked = !!data[key];
+                } else if (el.type === 'radio') {
+                    el.checked = (el.value === data[key]);
                 } else {
                     el.value = data[key];
                 }
-            }
+            });
         });
     }
-    
-    jobList.appendChild(clone);
+
+    // jobList に追加
+    jobList.appendChild(card);
+
+    // 固定残業代の表示状態を再反映
+    const helperEnabled = card.querySelector('[name="helper_enabled"]')?.value;
+    const helperBox = card.querySelector('.helper-fields');
+
+    if (helperBox) {
+        if (helperEnabled === "yes") {
+            helperBox.classList.remove('hidden');
+        } else {
+            helperBox.classList.add('hidden');
+        }
+    }
+
     updateNumbers();
     validateDuplicates();
+
     if (shouldSave) saveData();
 }
 
-function removeJob(btn) {
-    // 確認なしで即座に削除
-    const card = btn.closest('.job-card');
+
+        function removeJob(btn) {
+            const card = btn.closest('.job-card');
+            if (!card) return;
+            card.remove();
+            updateNumbers();
+            validateDuplicates();
+            saveData();
+            if (jobList.children.length === 0) emptyState.classList.remove('hidden');
+        }
+
+        function copyJob(button) {
+
+    const card = button.closest('.job-card');
     if (!card) return;
-    
-    card.remove();
+
+    // 現在の入力値を取得
+    const data = {};
+    card.querySelectorAll('input, select, textarea').forEach(el => {
+        if (el.type === 'checkbox') {
+            data[el.name] = el.checked;
+        } else if (el.type === 'radio') {
+            if (el.checked) data[el.name] = el.value;
+        } else {
+            data[el.name] = el.value;
+        }
+    });
+
+    // 🔥 cloneは使わない
+    addNewJob(data);
+
     updateNumbers();
     validateDuplicates();
     saveData();
-    
-    if (jobList.children.length === 0) {
-        emptyState.classList.remove('hidden');
-    }
 }
 
-        function copyJob(btn) {
-            const card = btn.closest('.job-card');
-            const data = {};
-            card.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.type === 'checkbox') data[el.name] = el.checked;
-                else data[el.name] = el.value;
-            });
-            addNewJob(data);
-        }
+
+function rebindCard(card) {
+
+    // 固定残業代再接続
+    const fixedInputs = card.querySelectorAll(
+        '[name="fixed_amount"],[name="fixed_hours"],[name="fixed_condition"]'
+    );
+
+    fixedInputs.forEach(input => {
+        input.oninput = function() {
+            updateSalaryNote(this);
+        };
+    });
+}
 
         function updateNumbers() {
             jobList.querySelectorAll('.job-card').forEach((card, i) => {
                 card.querySelector('.card-number').innerText = `案件 #${i + 1}`;
+                // ラジオボタンのname重複回避（バグ防止）
+                card.querySelectorAll('input[type="radio"]').forEach(r => {
+                    r.name = `helper_enabled_radio_${i}`;
+                });
             });
             emptyState.classList.toggle('hidden', jobList.children.length > 0);
         }
@@ -424,500 +662,136 @@ function removeJob(btn) {
             return hasError;
         }
 
-// ===== CSV パース関数 =====
-function handleCSVUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const csvText = e.target.result;
-            const jobs = parseCSV(csvText);
-            
-            if (jobs.length === 0) {
-                alert('CSVファイルにデータが見つかりません。');
-                return;
-            }
-
-            // パース成功 → 次のバリデーション関数に渡す
-            validateAndImport(jobs);
-        } catch (error) {
-            alert(`CSVファイルの読み込みに失敗しました:\n${error.message}`);
+        // CSV パース
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const csvText = e.target.result;
+                    const jobs = parseCSV(csvText);
+                    if (jobs.length === 0) { alert('CSVファイルにデータが見つかりません。'); return; }
+                    validateAndImport(jobs);
+                } catch (error) { alert(`CSVファイルの読み込みに失敗しました:\n${error.message}`); }
+            };
+            reader.readAsText(file, 'utf-8');
         }
-    };
-    reader.readAsText(file, 'utf-8');
-}
 
-function parseCSV(csvText) {
-    const lines = csvText.split('\n').filter(line => line.trim());
-    
-    if (lines.length < 2) {
-        throw new Error('CSVファイルが空です（ヘッダー行と最低1行のデータが必要です）');
-    }
-
-    // ヘッダー行を解析
-    const headerLine = lines[0];
-    const headers = parseCSVLine(headerLine);
-    
-    // ヘッダーの妥当性チェック
-    if (headers.length === 0) {
-        throw new Error('CSVヘッダーが読み込めません');
-    }
-
-    // データ行を解析
-    const jobs = [];
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue; // 空行をスキップ
-
-        const values = parseCSVLine(line);
-        const jobData = {};
-
-        // ヘッダーと値をマッピング
-        headers.forEach((header, index) => {
-            const fieldName = mapHeaderToFieldName(header);
-            if (fieldName) {
-                jobData[fieldName] = values[index] || '';
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) throw new Error('ヘッダー行とデータ行が必要です');
+            const headers = parseCSVLine(lines[0]);
+            const jobs = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                const jobData = {};
+                headers.forEach((header, index) => {
+                    const fieldName = mapHeaderToFieldName(header);
+                    if (fieldName) jobData[fieldName] = values[index] || '';
+                });
+                jobs.push(jobData);
             }
-        });
+            return jobs;
+        }
 
-        jobs.push(jobData);
-    }
-
-    if (jobs.length === 0) {
-        throw new Error('有効なデータ行が見つかりません');
-    }
-
-    return jobs;
-}
-
-// CSVの1行を解析（カンマとクォートを適切に処理）
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let insideQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const nextChar = line[i + 1];
-
-        if (char === '"') {
-            if (insideQuotes && nextChar === '"') {
-                // ダブルクォートのエスケープ処理
-                current += '"';
-                i++;
-            } else {
-                // クォート開閉
-                insideQuotes = !insideQuotes;
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let insideQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (insideQuotes && line[i + 1] === '"') { current += '"'; i++; }
+                    else insideQuotes = !insideQuotes;
+                } else if (char === ',' && !insideQuotes) { result.push(current.trim()); current = ''; }
+                else current += char;
             }
-        } else if (char === ',' && !insideQuotes) {
-            // フィールド区切り
             result.push(current.trim());
-            current = '';
-        } else {
-            current += char;
+            return result;
         }
-    }
 
-    result.push(current.trim());
-    return result;
-}
+        function mapHeaderToFieldName(header) {
+            const mapping = {
+                '職種': 'job_title', '雇用形態': 'employment_type', '応募資格': 'qualification', '給与': 'salary_type', '下限': 'salary_min', '上限': 'salary_max', '給与備考': 'salary_note',
+                '履歴書不要': 'char_no_resume', '新卒歓迎': 'char_new_grad', '未経験者歓迎': 'char_inexperienced', '独立希望者歓迎': 'char_independent', '経験者優遇': 'char_experienced',
+                'ボーナス・賞与あり': 'ben_bonus', '昇給あり': 'ben_rise', '寮・住宅手当あり': 'ben_dorm', '交通費全額支給': 'ben_train_full', '家族手当': 'ben_family', '資格手当・スキル手当': 'ben_skill', 'インセンティブ制度': 'ben_incentive', '退職金': 'ben_retire', '日払いOK': 'ben_daily', '扶養内OK': 'ben_fuyo',
+                '勤務時間': 'work_time_text', 'ランチのお仕事': 'work_lunch', '終電考慮': 'work_train', '副業・ダブルワークOK': 'work_w', 'フルタイム歓迎': 'work_full', '残業月20時間以内': 'work_ot',
+                '休日・休暇': 'holiday_text', '月8日以上休み': 'hol_8', '月9日以上休み': 'hol_9', '完全週休2日制': 'hol_2', '産休・育休': 'hol_baby', '夏季休暇': 'hol_summer', '年末年始休暇': 'hol_winter', 'GW休暇': 'hol_gw', '特別休暇': 'hol_spec',
+                'まかない・食事補助あり': 'ben_makanai', '社会保険完備': 'ben_ins', '制服貸与': 'ben_uniform', '研修が充実': 'ben_training', '海外研修': 'ben_overseas', '生産者訪問': 'ben_visit', '資格取得支援': 'ben_license', 'バイク・車通勤OK': 'ben_car', '社員登用制度': 'ben_emp', '髪型自由': 'ben_hair',
+                '仕事内容・求める人材': 'content', 'ラテアート': 'sk_latte', '包丁さばき': 'sk_knife', '飾り包丁': 'sk_deco', 'ピザメイク': 'sk_pizza', '製麺': 'sk_noodle', '寿司技術': 'sk_sushi', '盛り付け技術': 'sk_plating', '製パン技術': 'sk_bread', '製菓技術': 'sk_pastry', 'カクテル技法': 'sk_cocktail', '高級食材の知識': 'sk_premium', '英会話': 'sk_english',
+                'ワインの知識': 'kn_wine', '日本酒の知識': 'kn_sake', 'お酒の知識': 'kn_liquor', 'コーヒーの知識': 'kn_coffee', 'お茶の知識': 'kn_tea', '肉の知識': 'kn_meat', '魚の知識': 'kn_fish', '野菜の知識': 'kn_vege', 'チーズの知識': 'kn_cheese', '洋菓子の知識': 'kn_w_sweets', '和菓子の知識': 'kn_j_sweets', '食器の知識': 'kn_tableware', '婚礼料理・パーティーメニュー': 'kn_wedding', 'テーブルマナー': 'kn_manner', '着物の着付け': 'kn_kimono', '出店開業ノウハウ': 'no_open', '店舗運営': 'no_mgmt', 'メニュー開発': 'no_menu', '仕入れ・食材調達': 'no_stock'
+            };
+            return mapping[header] || null;
+        }
 
-// CSVヘッダーをフォーム内のフィールド名にマッピング
-function mapHeaderToFieldName(header) {
-    const mapping = {
-        '職種': 'job_title',
-        '雇用形態': 'employment_type',
-        '応募資格': 'qualification',
-        '給与': 'salary_type',
-        '下限': 'salary_min',
-        '上限': 'salary_max',
-        '給与備考': 'salary_note',
-        '履歴書不要': 'char_no_resume',
-        '新卒歓迎': 'char_new_grad',
-        '未経験者歓迎': 'char_inexperienced',
-        '独立希望者歓迎': 'char_independent',
-        '経験者優遇': 'char_experienced',
-        'ボーナス・賞与あり': 'ben_bonus',
-        '昇給あり': 'ben_rise',
-        '寮・住宅手当あり': 'ben_dorm',
-        '交通費全額支給': 'ben_train_full',
-        '家族手当': 'ben_family',
-        '資格手当・スキル手当': 'ben_skill',
-        'インセンティブ制度': 'ben_incentive',
-        '退職金': 'ben_retire',
-        '日払いOK': 'ben_daily',
-        '扶養内OK': 'ben_fuyo',
-        '勤務時間': 'work_time_text',
-        'ランチのお仕事': 'work_lunch',
-        '終電考慮': 'work_train',
-        '副業・ダブルワークOK': 'work_w',
-        'フルタイム歓迎': 'work_full',
-        '残業月20時間以内': 'work_ot',
-        '休日・休暇': 'holiday_text',
-        '月8日以上休み': 'hol_8',
-        '月9日以上休み': 'hol_9',
-        '完全週休2日制': 'hol_2',
-        '産休・育休': 'hol_baby',
-        '夏季休暇': 'hol_summer',
-        '年末年始休暇': 'hol_winter',
-        'GW休暇': 'hol_gw',
-        '特別休暇': 'hol_spec',
-        'まかない・食事補助あり': 'ben_makanai',
-        '社会保険完備': 'ben_ins',
-        '制服貸与': 'ben_uniform',
-        '研修が充実': 'ben_training',
-        '海外研修': 'ben_overseas',
-        '生産者訪問': 'ben_visit',
-        '資格取得支援': 'ben_license',
-        'バイク・車通勤OK': 'ben_car',
-        '社員登用制度': 'ben_emp',
-        '髪型自由': 'ben_hair',
-        '仕事内容・求める人材': 'content',
-        'ラテアート': 'sk_latte',
-        '包丁さばき': 'sk_knife',
-        '飾り包丁': 'sk_deco',
-        'ピザメイク': 'sk_pizza',
-        '製麺': 'sk_noodle',
-        '寿司技術': 'sk_sushi',
-        '盛り付け技術': 'sk_plating',
-        '製パン技術': 'sk_bread',
-        '製菓技術': 'sk_pastry',
-        'カクテル技法': 'sk_cocktail',
-        '高級食材の知識': 'sk_premium',
-        '英会話': 'sk_english',
-        'ワインの知識': 'kn_wine',
-        '日本酒の知識': 'kn_sake',
-        'お酒の知識': 'kn_liquor',
-        'コーヒーの知識': 'kn_coffee',
-        'お茶の知識': 'kn_tea',
-        '肉の知識': 'kn_meat',
-        '魚の知識': 'kn_fish',
-        '野菜の知識': 'kn_vege',
-        'チーズの知識': 'kn_cheese',
-        '洋菓子の知識': 'kn_w_sweets',
-        '和菓子の知識': 'kn_j_sweets',
-        '食器の知識': 'kn_tableware',
-        '婚礼料理・パーティーメニュー': 'kn_wedding',
-        'テーブルマナー': 'kn_manner',
-        '着物の着付け': 'kn_kimono',
-        '出店開業ノウハウ': 'no_open',
-        '店舗運営': 'no_mgmt',
-        'メニュー開発': 'no_menu',
-        '仕入れ・食材調達': 'no_stock'
-    };
-    return mapping[header] || null;
-}
+        function normalizeCheckboxValue(value) {
+            if (!value) return false;
+            value = String(value).trim().toLowerCase();
+            return ['1', 'true', 'yes', 'on', '〇', '◯'].includes(value);
+        }
 
-// チェックボックス値の正規化（複数の形式に対応）
-function normalizeCheckboxValue(value) {
-    if (!value) return false;
-    value = String(value).trim().toLowerCase();
-    return ['1', 'true', 'yes', 'on', '〇', '◯'].includes(value);
-}
+        function validateAndImport(jobs) {
+            const errors = [];
+            const warnings = [];
+            const requiredFields = ['job_title', 'employment_type', 'salary_type', 'salary_min', 'work_time_text', 'holiday_text', 'content'];
 
-// ===== バリデーション関数 =====
-function validateAndImport(jobs) {
-    const errors = [];
-    const warnings = [];
-
-    // 必須フィールドの定義
-    const requiredFields = [
-        'job_title',
-        'employment_type',
-        'salary_type',
-        'salary_min',
-        'work_time_text',
-        'holiday_text',
-        'content'
-    ];
-
-    // 各案件をバリデーション
-    jobs.forEach((job, rowIndex) => {
-        const rowNum = rowIndex + 2; // CSVは1行目がヘッダーなので、2行目から開始
-
-        // 1. 必須項目チェック
-        requiredFields.forEach(field => {
-            if (!job[field] || String(job[field]).trim() === '') {
-                errors.push({
-                    row: rowNum,
-                    field: field,
-                    message: `必須項目「${getFieldLabel(field)}」が入力されていません`,
-                    type: 'required'
+            jobs.forEach((job, rowIndex) => {
+                const rowNum = rowIndex + 2;
+                requiredFields.forEach(field => {
+                    if (!job[field] || String(job[field]).trim() === '') {
+                        errors.push({ row: rowNum, field: field, message: `必須項目「${getFieldLabel(field)}」が未入力です` });
+                    }
                 });
-            }
-        });
-
-        // 2. 数値フィールドのチェック
-        if (job['salary_min'] && isNaN(Number(job['salary_min']))) {
-            errors.push({
-                row: rowNum,
-                field: 'salary_min',
-                message: `給与下限は数値で入力してください（入力値: ${job['salary_min']}）`,
-                type: 'format'
+                
+                // チェックボックスの正規化
+                const checkboxFields = ['char_no_resume', 'char_new_grad', 'char_inexperienced', 'char_independent', 'char_experienced', 'ben_bonus', 'ben_rise', 'ben_dorm', 'ben_train_full', 'ben_family', 'ben_skill', 'ben_incentive', 'ben_retire', 'ben_daily', 'ben_fuyo', 'work_lunch', 'work_train', 'work_w', 'work_full', 'work_ot', 'hol_8', 'hol_9', 'hol_2', 'hol_baby', 'hol_summer', 'hol_winter', 'hol_gw', 'hol_spec', 'ben_makanai', 'ben_ins', 'ben_uniform', 'ben_training', 'ben_overseas', 'ben_visit', 'ben_license', 'ben_car', 'ben_emp', 'ben_hair', 'sk_latte', 'sk_knife', 'sk_deco', 'sk_pizza', 'sk_noodle', 'sk_sushi', 'sk_plating', 'sk_bread', 'sk_pastry', 'sk_cocktail', 'sk_premium', 'sk_english', 'kn_wine', 'kn_sake', 'kn_liquor', 'kn_coffee', 'kn_tea', 'kn_meat', 'kn_fish', 'kn_vege', 'kn_cheese', 'kn_w_sweets', 'kn_j_sweets', 'kn_tableware', 'kn_wedding', 'kn_manner', 'kn_kimono', 'no_open', 'no_mgmt', 'no_menu', 'no_stock'];
+                checkboxFields.forEach(f => { job[f] = normalizeCheckboxValue(job[f]); });
+                
+                // インポート時は補助入力は「未設定(手入力)」をデフォルトにする
+                job['helper_enabled'] = 'no';
             });
+
+            showValidationResult(jobs, errors, warnings);
         }
 
-        if (job['salary_max'] && isNaN(Number(job['salary_max']))) {
-            errors.push({
-                row: rowNum,
-                field: 'salary_max',
-                message: `給与上限は数値で入力してください（入力値: ${job['salary_max']}）`,
-                type: 'format'
-            });
+        function getFieldLabel(f) {
+            const labels = { 'job_title': '職種', 'employment_type': '雇用形態', 'salary_type': '給与種別', 'salary_min': '給与下限', 'work_time_text': '勤務時間', 'holiday_text': '休日・休暇', 'content': '仕事内容' };
+            return labels[f] || f;
         }
 
-        // 3. 給与下限と上限の大小関係チェック
-        if (job['salary_min'] && job['salary_max']) {
-            const min = Number(job['salary_min']);
-            const max = Number(job['salary_max']);
-            if (!isNaN(min) && !isNaN(max) && min > max) {
-                warnings.push({
-                    row: rowNum,
-                    field: 'salary_range',
-                    message: `給与下限（${min}）が上限（${max}）より大きくなっています`,
-                    type: 'logic'
-                });
+        function showValidationResult(jobs, errors, warnings) {
+            if (errors.length > 0) {
+                const msg = buildErrorMessage(errors, warnings);
+                const errRows = new Set(errors.map(e => e.row));
+                const clean = jobs.filter((_, i) => !errRows.has(i + 2));
+                showValidationModal(msg, jobs, errors.length, warnings.length, clean);
+            } else {
+                showImportConfirmModal(`${jobs.length}件の案件を読み込みます。`, jobs);
             }
         }
 
-        // 4. 職種の妥当性チェック
-        const validJobTitles = [
-            '店長候補・マネージャー', 'サービス・ホール', '料理長候補（シェフ・板前など）',
-            '調理スタッフ', '調理補助・調理見習い', 'パティシエ', 'パン職人・ブーランジェ',
-            'ピザ職人・ピッツァイオーロ', 'ソムリエ', 'バーテンダー', 'バリスタ',
-            'レセプション・フロント', '洗い場・皿洗い', '販売スタッフ', '本部スタッフ・SV',
-            'デリバリー・配達スタッフ', '食品加工・製造（精肉・鮮魚等）', 'その他'
-        ];
-
-        if (job['job_title'] && !validJobTitles.includes(job['job_title'])) {
-            errors.push({
-                row: rowNum,
-                field: 'job_title',
-                message: `職種「${job['job_title']}」は無効です。選択肢から選んでください`,
-                type: 'format'
-            });
+        function buildErrorMessage(errors, warnings) {
+            let m = `❌ ${errors.length}件のエラーがあります\n\n`;
+            errors.forEach(e => { m += `${e.row}行目: ${e.message}\n`; });
+            return m;
         }
-
-        // 5. 雇用形態の妥当性チェック
-        const validEmploymentTypes = ['正社員', 'アルバイト・パート', '契約社員', '業務委託'];
-        if (job['employment_type'] && !validEmploymentTypes.includes(job['employment_type'])) {
-            errors.push({
-                row: rowNum,
-                field: 'employment_type',
-                message: `雇用形態「${job['employment_type']}」は無効です。選択肢から選んでください`,
-                type: 'format'
-            });
-        }
-
-        // 6. 給与種別の妥当性チェック
-        const validSalaryTypes = ['月給', '時給', '年俸'];
-        if (job['salary_type'] && !validSalaryTypes.includes(job['salary_type'])) {
-            errors.push({
-                row: rowNum,
-                field: 'salary_type',
-                message: `給与種別「${job['salary_type']}」は無効です。選択肢から選んでください`,
-                type: 'format'
-            });
-        }
-
-        // 7. チェックボックス項目の値の正規化と初期化
-// 事前にすべてのチェックボックス項目を初期化
-const checkboxFields = [
-    'char_no_resume', 'char_new_grad', 'char_inexperienced', 'char_independent',
-    'char_experienced', 'ben_bonus', 'ben_rise', 'ben_dorm', 'ben_train_full',
-    'ben_family', 'ben_skill', 'ben_incentive', 'ben_retire', 'ben_daily', 'ben_fuyo',
-    'work_lunch', 'work_train', 'work_w', 'work_full', 'work_ot',
-    'hol_8', 'hol_9', 'hol_2', 'hol_baby', 'hol_summer', 'hol_winter', 'hol_gw', 'hol_spec',
-    'ben_makanai', 'ben_ins', 'ben_uniform', 'ben_training', 'ben_overseas', 'ben_visit',
-    'ben_license', 'ben_car', 'ben_emp', 'ben_hair',
-    'sk_latte', 'sk_knife', 'sk_deco', 'sk_pizza', 'sk_noodle', 'sk_sushi', 'sk_plating',
-    'sk_bread', 'sk_pastry', 'sk_cocktail', 'sk_premium', 'sk_english',
-    'kn_wine', 'kn_sake', 'kn_liquor', 'kn_coffee', 'kn_tea', 'kn_meat', 'kn_fish',
-    'kn_vege', 'kn_cheese', 'kn_w_sweets', 'kn_j_sweets', 'kn_tableware', 'kn_wedding',
-    'kn_manner', 'kn_kimono',
-    'no_open', 'no_mgmt', 'no_menu', 'no_stock'
-];
-
-checkboxFields.forEach(field => {
-    if (!(field in job)) {
-        job[field] = false;
-    }
-});
-
-normalizeCheckboxFields(job);
-    });
-
-    // バリデーション結果を表示
-    showValidationResult(jobs, errors, warnings);
-}
-
-// フィールド名を日本語ラベルに変換
-function getFieldLabel(fieldName) {
-    const labels = {
-        'job_title': '職種',
-        'employment_type': '雇用形態',
-        'salary_type': '給与種別',
-        'salary_min': '給与下限',
-        'salary_max': '給与上限',
-        'work_time_text': '勤務時間',
-        'holiday_text': '休日・休暇',
-        'content': '仕事内容・求める人物像'
-    };
-    return labels[fieldName] || fieldName;
-}
-
-// チェックボックス項目を正規化
-function normalizeCheckboxFields(job) {
-    const checkboxFields = [
-        'char_no_resume', 'char_new_grad', 'char_inexperienced', 'char_independent',
-        'char_experienced', 'ben_bonus', 'ben_rise', 'ben_dorm', 'ben_train_full',
-        'ben_family', 'ben_skill', 'ben_incentive', 'ben_retire', 'ben_daily', 'ben_fuyo',
-        'work_lunch', 'work_train', 'work_w', 'work_full', 'work_ot',
-        'hol_8', 'hol_9', 'hol_2', 'hol_baby', 'hol_summer', 'hol_winter', 'hol_gw', 'hol_spec',
-        'ben_makanai', 'ben_ins', 'ben_uniform', 'ben_training', 'ben_overseas', 'ben_visit',
-        'ben_license', 'ben_car', 'ben_emp', 'ben_hair',
-        'sk_latte', 'sk_knife', 'sk_deco', 'sk_pizza', 'sk_noodle', 'sk_sushi', 'sk_plating',
-        'sk_bread', 'sk_pastry', 'sk_cocktail', 'sk_premium', 'sk_english',
-        'kn_wine', 'kn_sake', 'kn_liquor', 'kn_coffee', 'kn_tea', 'kn_meat', 'kn_fish',
-        'kn_vege', 'kn_cheese', 'kn_w_sweets', 'kn_j_sweets', 'kn_tableware', 'kn_wedding',
-        'kn_manner', 'kn_kimono',
-        'no_open', 'no_mgmt', 'no_menu', 'no_stock'
-    ];
-
-    checkboxFields.forEach(field => {
-        // 値が存在する場合のみ正規化
-        if (job[field] !== null && job[field] !== undefined && job[field] !== '') {
-            job[field] = normalizeCheckboxValue(job[field]);
-        } else {
-            // 値がない場合は false に統一
-            job[field] = false;
-        }
-    });
-}
-
-// バリデーション結果を表示
-function showValidationResult(jobs, errors, warnings) {
-    // エラーがある場合
-    if (errors.length > 0) {
-        const errorMessage = buildErrorMessage(errors, warnings);
-        // エラー行の行番号を抽出
-        const errorRowNumbers = new Set(errors.map(e => e.row));
-        // エラーのない行のみをフィルタリング
-        const cleanJobs = jobs.filter((job, index) => !errorRowNumbers.has(index + 2));
-        
-        showValidationModal(errorMessage, jobs, errors.length, warnings.length, cleanJobs);
-    }
-    // 警告のみの場合
-    else if (warnings.length > 0) {
-        const warningMessage = buildWarningMessage(warnings);
-        showImportConfirmModal(
-            `${warnings.length}件の警告があります。これらを確認して進めますか？\n\n${warningMessage}`,
-            jobs,
-            false
-        );
-    } 
-    // エラーと警告がない場合
-    else {
-        showImportConfirmModal(
-            `${jobs.length}件の案件を読み込みます。よろしいですか？`,
-            jobs,
-            false
-        );
-    }
-}
-
-// エラーメッセージを構築
-function buildErrorMessage(errors, warnings) {
-    let message = `❌ ${errors.length}件のエラーが見つかりました`;
-    
-    if (warnings.length > 0) {
-        message += `（警告: ${warnings.length}件）`;
-    }
-
-    message += '\n\n【エラー内容】\n';
-
-    // エラーを行ごとにグループ化
-    const errorsByRow = {};
-    errors.forEach(err => {
-        if (!errorsByRow[err.row]) errorsByRow[err.row] = [];
-        errorsByRow[err.row].push(err);
-    });
-
-    Object.keys(errorsByRow).sort((a, b) => a - b).forEach(row => {
-        message += `\n${row}行目:\n`;
-        errorsByRow[row].forEach(err => {
-            message += `  • ${err.message}\n`;
-        });
-    });
-
-    if (warnings.length > 0) {
-        message += '\n【警告内容】\n';
-        const warningsByRow = {};
-        warnings.forEach(warn => {
-            if (!warningsByRow[warn.row]) warningsByRow[warn.row] = [];
-            warningsByRow[warn.row].push(warn);
-        });
-
-        Object.keys(warningsByRow).sort((a, b) => a - b).forEach(row => {
-            message += `\n${row}行目:\n`;
-            warningsByRow[row].forEach(warn => {
-                message += `  ⚠️ ${warn.message}\n`;
-            });
-        });
-    }
-
-    return message;
-}
-
-// 警告メッセージを構築
-function buildWarningMessage(warnings) {
-    let message = '';
-    const warningsByRow = {};
-    warnings.forEach(warn => {
-        if (!warningsByRow[warn.row]) warningsByRow[warn.row] = [];
-        warningsByRow[warn.row].push(warn);
-    });
-
-    Object.keys(warningsByRow).sort((a, b) => a - b).forEach(row => {
-        message += `${row}行目: ${warningsByRow[row][0].message}\n`;
-    });
-
-    return message;
-}
-// ===== ここまで バリデーション関数 =====
 
         function downloadCSV() {
-            if (validateDuplicates()) {
-                if(!confirm("職種と雇用形態が重複している案件があります。そのまま出力しますか？")) return;
-            }
-
+            if (validateDuplicates()) { if(!confirm("重複案件がありますが、出力しますか？")) return; }
             const rows = [CSV_HEADERS.join(",")];
             jobList.querySelectorAll('.job-card').forEach(card => {
-                const getVal = (name) => {
-                    const el = card.querySelector(`[name="${name}"]`);
-                    return el ? el.value : "";
-                };
-                const isChk = (name) => {
-                    const el = card.querySelector(`[name="${name}"]`);
-                    return (el && el.checked) ? "1" : "";
-                };
-
+                const getVal = (n) => card.querySelector(`[name="${n}"]`)?.value || "";
+                const isChk = (n) => card.querySelector(`[name="${n}"]`)?.checked ? "1" : "";
                 const row = [
-                    "", // ID
-                    `"${getVal('job_title')}"`, 
-                    `"${getVal('employment_type')}"`,
+                    "", `"${getVal('job_title')}"`, `"${getVal('employment_type')}"`,
                     isChk('char_no_resume'), isChk('char_new_grad'), isChk('char_inexperienced'), isChk('char_independent'), isChk('char_experienced'),
-                    `"${getVal('salary_type')}"`, getVal('salary_min'), getVal('salary_max'), `"${getVal('salary_note')}"`,
+                    `"${getVal('salary_type')}"`, getVal('salary_min'), getVal('salary_max'), `"${getVal('salary_note').replace(/\r?\n/g, " ").replace(/"/g, '""')}"`,
                     isChk('ben_bonus'), isChk('ben_rise'), isChk('ben_dorm'), isChk('ben_train_full'), isChk('ben_family'), isChk('ben_skill'), isChk('ben_incentive'), isChk('ben_retire'), isChk('ben_daily'), isChk('ben_fuyo'),
-                    `"${getVal('qualification')}"`, 
-                    `"${getVal('work_time_text')}"`,
+                    `"${getVal('qualification')}"`, `"${getVal('work_time_text')}"`,
                     isChk('work_lunch'), isChk('work_train'), isChk('work_w'), isChk('work_full'), isChk('work_ot'),
-                    `"${getVal('holiday_text')}"`,
-                    isChk('hol_8'), isChk('hol_9'), isChk('hol_2'), isChk('hol_baby'), isChk('hol_summer'), isChk('hol_winter'), isChk('hol_gw'), isChk('hol_spec'),
-                    "", // 待遇
-                    isChk('ben_makanai'), isChk('ben_ins'), isChk('ben_uniform'), isChk('ben_training'), isChk('ben_overseas'), isChk('ben_visit'), isChk('ben_license'), isChk('ben_car'), isChk('ben_emp'), isChk('ben_hair'),
+                    `"${getVal('holiday_text')}"`, isChk('hol_8'), isChk('hol_9'), isChk('hol_2'), isChk('hol_baby'), isChk('hol_summer'), isChk('hol_winter'), isChk('hol_gw'), isChk('hol_spec'),
+                    "", isChk('ben_makanai'), isChk('ben_ins'), isChk('ben_uniform'), isChk('ben_training'), isChk('ben_overseas'), isChk('ben_visit'), isChk('ben_license'), isChk('ben_car'), isChk('ben_emp'), isChk('ben_hair'),
                     `"${getVal('content').replace(/\r?\n/g, "<br>").replace(/"/g, '""')}"`,
                     isChk('sk_latte'), isChk('sk_knife'), isChk('sk_deco'), isChk('sk_pizza'), isChk('sk_noodle'), isChk('sk_sushi'), isChk('sk_plating'), isChk('sk_bread'), isChk('sk_pastry'), isChk('sk_cocktail'), isChk('sk_premium'), isChk('sk_english'),
                     isChk('kn_wine'), isChk('kn_sake'), isChk('kn_liquor'), isChk('kn_coffee'), isChk('kn_tea'), isChk('kn_meat'), isChk('kn_fish'), isChk('kn_vege'), isChk('kn_cheese'), isChk('kn_w_sweets'), isChk('kn_j_sweets'), isChk('kn_tableware'), isChk('kn_wedding'), isChk('kn_manner'), isChk('kn_kimono'),
@@ -925,260 +799,70 @@ function buildWarningMessage(warnings) {
                 ];
                 rows.push(row.join(","));
             });
-
-            const csvContent = "\uFEFF" + rows.join("\n");
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = `求人出力_${new Date().toLocaleDateString()}.csv`;
             link.click();
         }
 
-
-
-// ===== モーダル表示関数 =====
-
-// グローバル変数（モーダル間でデータを共有）
-let pendingJobsForImport = null;
-let pendingErrorsForImport = null;
-let pendingCleanJobsForImport = null;  // ← これを追加
-
-function showValidationModal(message, jobs, errorCount, warningCount, cleanJobs = null) {
-    const modal = document.getElementById('validationModal');
-    const content = document.getElementById('validationModalContent');
-    const errorCountEl = document.getElementById('errorCount');
-    const warningBadge = document.getElementById('warningBadge');
-    const warningCountEl = document.getElementById('warningCount');
-
-    content.textContent = message;
-    errorCountEl.textContent = errorCount;
-
-    if (warningCount > 0) {
-        warningCountEl.textContent = warningCount;
-        warningBadge.classList.remove('hidden');
-    } else {
-        warningBadge.classList.add('hidden');
-    }
-
-    // データを保存（後で利用するため）
-    pendingJobsForImport = jobs;
-    // クリーンなデータも保存
-    pendingCleanJobsForImport = cleanJobs || jobs;
-
-    modal.classList.remove('hidden');
-}
-
-function closeValidationModal() {
-    document.getElementById('validationModal').classList.add('hidden');
-    pendingJobsForImport = null;
-    pendingErrorsForImport = null;
-    pendingCleanJobsForImport = null;
-    // ファイル入力をリセット
-    document.getElementById('csvFileInput').value = '';
-}
-
-function importWithErrors() {
-    if (!pendingCleanJobsForImport || pendingCleanJobsForImport.length === 0) {
-        alert('エラー行をすべて削除したため、インポートするデータがありません');
-        return;
-    }
-
-    closeValidationModal();
-
-    showImportConfirmModal(
-        `${pendingCleanJobsForImport.length}件の案件を読み込みます。（エラー行はスキップされました）\n\nよろしいですか？`,
-        pendingCleanJobsForImport,
-        true
-    );
-}
-
-function showImportConfirmModal(message, jobs, isWithErrors = false) {
-    const modal = document.getElementById('importConfirmModal');
-    const content = document.getElementById('importConfirmContent');
-
-    content.textContent = message;
-    pendingJobsForImport = jobs;
-
-    modal.classList.remove('hidden');
-}
-
-function closeImportConfirmModal() {
-    document.getElementById('importConfirmModal').classList.add('hidden');
-    // pendingJobsForImport はここでクリアしない！（executeImport内で使用するため）
-    // ファイル入力をリセット
-    document.getElementById('csvFileInput').value = '';
-}
-
-// ===== インポート実行関数 =====
-function executeImport() {
-    if (!pendingJobsForImport || pendingJobsForImport.length === 0) {
-        alert('インポートするデータがありません');
-        return;
-    }
-
-    closeImportConfirmModal();
-    
-    // カスタムダイアログを表示
-    showClearConfirmDialog();
-}
-
-function showClearConfirmDialog() {
-    const result = confirm('既存の案件をクリアして新しいデータで置き換えますか？\n\nOK: 置き換える\nキャンセル: 既存データに追加する');
-    
-    proceedImport(result);
-}
-
-function proceedImport(shouldClear) {
-    showImportProgressModal();
-
-    // 非同期で実行（UIの更新を許可）
-    setTimeout(() => {
-        try {
-            const jobsToAdd = pendingJobsForImport;
-
-            console.log('開始: インポート処理');
-            console.log('jobsToAdd:', jobsToAdd);
-            console.log('shouldClear:', shouldClear);
-
-            if (shouldClear) {
-                console.log('既存データをクリア中...');
-                // DOM をクリア
-                jobList.innerHTML = '';
-                // LocalStorage もクリア
-                localStorage.removeItem(STORAGE_KEY);
-                emptyState.classList.add('hidden');
-            }
-
-            console.log('案件を追加中...');
-            // 案件を追加
-            jobsToAdd.forEach((jobData, index) => {
-                console.log(`${index}番目の案件を追加:`, jobData);
-                addNewJob(jobData, false);
-            });
-
-            console.log('データを保存中...');
-            // 保存
-            saveData();
-
-            console.log('インポート完了！');
-            closeImportProgressModal();
-            showImportCompleteModal(jobsToAdd.length);
-
-        } catch (error) {
-            console.error('エラー詳細:', error);
-            console.error('スタックトレース:', error.stack);
-            closeImportProgressModal();
-            alert(`インポート中にエラーが発生しました:\n${error.message}\n\n詳細はコンソールを確認してください`);
+        // モーダル制御
+        let pendingJobs = null;
+        let pendingCleanJobs = null;
+        function showValidationModal(m, j, e, w, c) {
+            document.getElementById('validationModalContent').textContent = m;
+            document.getElementById('errorCount').textContent = e;
+            pendingJobs = j; pendingCleanJobs = c;
+            document.getElementById('validationModal').classList.remove('hidden');
         }
-    }, 100);
-}
-
-// ===== モーダル表示関数 =====
-
-function showImportProgressModal() {
-    document.getElementById('importProgressModal').classList.remove('hidden');
-}
-
-function closeImportProgressModal() {
-    document.getElementById('importProgressModal').classList.add('hidden');
-}
-
-function showImportCompleteModal(count) {
-    const modal = document.getElementById('importCompleteModal');
-    const message = document.getElementById('importCompleteMessage');
-
-    message.textContent = `${count}件の案件を読み込みました。`;
-    modal.classList.remove('hidden');
-}
-
-function closeImportCompleteModal() {
-    document.getElementById('importCompleteModal').classList.add('hidden');
-    pendingJobsForImport = null;
-    pendingErrorsForImport = null;
-    pendingCleanJobsForImport = null;
-    // ファイル入力をリセット
-    document.getElementById('csvFileInput').value = '';
-}
-
-// ===== ここまで モーダル表示関数 =====
-
+        function closeValidationModal() { document.getElementById('validationModal').classList.add('hidden'); }
+        function importWithErrors() { closeValidationModal(); showImportConfirmModal(`エラー行を除いた${pendingCleanJobs.length}件を読み込みます。`, pendingCleanJobs); }
+        function showImportConfirmModal(m, j) {
+            document.getElementById('importConfirmContent').textContent = m;
+            pendingJobs = j;
+            document.getElementById('importConfirmModal').classList.remove('hidden');
+        }
+        function closeImportConfirmModal() { document.getElementById('importConfirmModal').classList.add('hidden'); }
+        function executeImport() {
+            closeImportConfirmModal();
+            const shouldClear = confirm('既存案件をクリアして置き換えますか？\nOK: 置き換える / キャンセル: 追加する');
+            if (shouldClear) { jobList.innerHTML = ''; localStorage.removeItem(STORAGE_KEY); }
+            pendingJobs.forEach(j => addNewJob(j, false));
+            saveData();
+            alert(`${pendingJobs.length}件読み込み完了`);
+        }
     </script>
 
-<!-- バリデーション結果モーダル -->
+    <!-- モーダル類 -->
     <div id="validationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div class="bg-rose-600 text-white p-4 flex justify-between items-center sticky top-0">
                 <h2 class="text-lg font-bold">⚠️ 読み込みエラー</h2>
                 <button onclick="closeValidationModal()" class="text-2xl leading-none hover:text-rose-200">&times;</button>
             </div>
-            <div class="p-6 whitespace-pre-wrap text-sm leading-relaxed" id="validationModalContent">
-            </div>
+            <div class="p-6 whitespace-pre-wrap text-sm leading-relaxed" id="validationModalContent"></div>
             <div class="bg-slate-50 p-4 flex justify-between items-center border-t sticky bottom-0">
-                <div class="text-xs text-slate-500">
-                    <span id="errorCount">0</span>件のエラー
-                    <span id="warningBadge" class="hidden">+ <span id="warningCount">0</span>件の警告</span>
-                </div>
+                <div class="text-xs text-slate-500"><span id="errorCount">0</span>件のエラー</div>
                 <div class="flex gap-2">
-                    <button onclick="closeValidationModal()" class="px-4 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 rounded-lg font-bold text-sm transition">
-                        キャンセル
-                    </button>
-                    <button onclick="importWithErrors()" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold text-sm transition">
-                        エラー行をスキップして読み込む
-                    </button>
+                    <button onclick="closeValidationModal()" class="px-4 py-2 bg-slate-300 rounded-lg font-bold text-sm">キャンセル</button>
+                    <button onclick="importWithErrors()" class="px-4 py-2 bg-orange-500 text-white rounded-lg font-bold text-sm">エラー行をスキップして読み込む</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- インポート確認モーダル -->
     <div id="importConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
                 <h2 class="text-lg font-bold">✓ 読み込み確認</h2>
                 <button onclick="closeImportConfirmModal()" class="text-2xl leading-none hover:text-blue-200">&times;</button>
             </div>
-            <div class="p-6 text-sm leading-relaxed" id="importConfirmContent">
-            </div>
+            <div class="p-6 text-sm leading-relaxed" id="importConfirmContent"></div>
             <div class="bg-slate-50 p-4 flex justify-end gap-2 border-t">
-                <button onclick="closeImportConfirmModal()" class="px-4 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 rounded-lg font-bold text-sm transition">
-                    キャンセル
-                </button>
-                <button onclick="executeImport()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm transition">
-                    読み込む
-                </button>
+                <button onclick="closeImportConfirmModal()" class="px-4 py-2 bg-slate-300 rounded-lg font-bold text-sm">キャンセル</button>
+                <button onclick="executeImport()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm">読み込む</button>
             </div>
         </div>
     </div>
-
-    <!-- インポート進行状況モーダル -->
-    <div id="importProgressModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
-            <div class="mb-4">
-                <svg class="w-12 h-12 text-green-600 mx-auto animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </div>
-            <p class="text-slate-700 font-bold" id="importProgressText">読み込み中...</p>
-            <p class="text-xs text-slate-500 mt-2" id="importProgressDetail"></p>
-        </div>
-    </div>
-
-    <!-- インポート完了モーダル -->
-    <div id="importCompleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
-            <div class="mb-4">
-                <svg class="w-16 h-16 text-green-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">読み込み完了！</h3>
-            <p class="text-sm text-slate-600 mb-6" id="importCompleteMessage"></p>
-            <button onclick="closeImportCompleteModal()" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm transition">
-                確認
-            </button>
-        </div>
-    </div>
-
 </body>
 </html>
